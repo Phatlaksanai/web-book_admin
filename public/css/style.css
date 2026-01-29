@@ -269,5 +269,61 @@ body {
   margin: 0 auto;
   padding: 40px 20px;
 }
+/* =================================================
+   FOOTER ⭐ เหมือน CreateCode
+================================================= */
+#footer {
+  margin-top: auto;
+
+  background: #2c3e50;
+  color: #fff;
+
+  text-align: center;
+  padding: 15px;
+
+  font-size: 14px;
+}
+
+/* ================= NAVBAR NEW STYLE ================= */
+
+.custom-navbar {
+  background: #2c3e50 !important;
+  height: 60px;
+  padding: 0 20px;
+}
+
+/* logo */
+.brand-title {
+  color: #83eea9;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* ปุ่มเมนู */
+.nav-btn {
+  font-size: 17px;     /* ⭐ ใหญ่ขึ้น */
+  font-weight: 700;    /* ⭐ หนาขึ้น */
+
+  color: white !important;
+
+  background: #e74c3c;
+  border-radius: 8px;
+
+  padding: 7px 14px !important;
+  margin-left: 8px;
+
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  background: #c0392b;
+}
+
+/* ⭐ ACTIVE PAGE */
+.nav-btn.active {
+  background: white !important;
+  color: #e74c3c !important;
+}
 
 

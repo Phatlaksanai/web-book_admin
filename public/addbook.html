@@ -12,29 +12,42 @@
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar (shared) -->
+<!-- ================= Navbar ================= -->
 <div id="navbar"></div>
-
-<!-- ✅ Content -->
+<!-- ================= Content ================= -->
 <div class="main-content">
-  <div class="container mt-5">
-    <div class="card shadow">
-      <div class="card-body">
+  <div class="container mt-5" style="max-width:720px;">
+    <!-- ===== TITLE ===== -->
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">📘 Add Book</h2>
+      <p class="text-muted">เพิ่มหนังสือเข้าสู่ระบบ</p>
+    </div>
+    <!-- ===== FORM CARD ===== -->
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
 
-        <h4 id="pageTitle" class="mb-4">📘 Add Book</h4>
-        <p id="create-message" class="text-center mt-3 fw-bold"></p>
+        <p id="create-message" class="text-center fw-bold text-success"></p>
 
-        <!-- Book Title -->
-        <div class="mb-3">
-          <label class="form-label">Book Title</label>
-          <input id="title" class="form-control" />
+        <!-- Title -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Book Title</label>
+          <input id="title" class="form-control" placeholder="Enter book title" />
         </div>
 
-        <!-- Book Cover -->
-        <div class="mb-3">
-          <label class="form-label">Book Cover</label>
+
+        <!-- Cover -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Book Cover</label>
+
           <input type="file" id="cover" class="form-control" accept="image/*" />
-          <img id="coverPreview" style="max-width:150px;margin-top:10px;display:none;">
+
+          <div class="text-center mt-3">
+            <img
+              id="coverPreview"
+              style="max-width:160px; border-radius:12px; display:none;"
+              class="shadow-sm"
+            />
+          </div>
         </div>
 
         <!-- Detail -->
@@ -58,7 +71,6 @@
         <button id="submitBtn" class="btn btn-primary w-100" onclick="submitBook()">
           Create Book
         </button>
-
       </div>
     </div>
   </div>

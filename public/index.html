@@ -12,49 +12,50 @@
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar (shared) -->
+<!-- ================= Navbar ================= -->
 <div id="navbar"></div>
-
-<!-- ✅ Content (สำคัญมาก) -->
+<!-- ================= Content ================= -->
 <div class="main-content">
-  <div class="container mt-5">
-    <div class="card shadow">
-      <div class="card-body">
-
-        <div class="row g-3 mt-3">
-          <div class="col-md-4">
-            <div class="card shadow-sm text-center">
-              <div class="card-body">
-                <h6>📚 Books in System</h6>
-                <h2 id="totalBooks">0</h2>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card shadow-sm text-center">
-              <div class="card-body">
-                <h6>📖 My Added Books</h6>
-                <h2 id="myBooks">0</h2>
-              </div>
-            </div>
+  <div class="container mt-5" style="max-width:1100px;">
+    <!-- ===== TITLE ===== -->
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">📊 Dashboard</h2>
+      <p class="text-muted">ภาพรวมการจัดการหนังสือในระบบ</p>
+    </div>
+    <!-- ===== STATS ===== -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm text-center h-100">
+          <div class="card-body">
+            <h6 class="text-muted mb-2">📚 Books in System</h6>
+            <h2 id="totalBooks" class="fw-bold">0</h2>
           </div>
         </div>
-
-        <!-- History -->
-        <div class="card shadow-sm mt-4">
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm text-center h-100">
           <div class="card-body">
-            <h5>🕒 Add History</h5>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody id="historyTable"></tbody>
-            </table>
+            <h6 class="text-muted mb-2">📖 My Added Books</h6>
+            <h2 id="myBooks" class="fw-bold">0</h2>
           </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== HISTORY TABLE ===== -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="mb-3">🕒 Add History</h5>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Title</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+
+            <tbody id="historyTable"></tbody>
+          </table>
         </div>
       </div>
     </div>
