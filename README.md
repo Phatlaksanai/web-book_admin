@@ -3,6 +3,8 @@ npm install nodemon --save-dev
 npm install bcryptjs
 npm install express-session
 npm install connect-mongo@4
+npm install nodemailer otp-generator dotenv
+
 
 npm install qrcode
 npm install bwip-js
@@ -34,10 +36,12 @@ star-up
 ├─ models
 │  ├─ Book.js
 │  ├─ BookCode.js
+│  ├─ OTP.js
 │  └─ User.js
 ├─ package-lock.json
 ├─ package.json
 ├─ public
+│  ├─ addAdmin.html
 │  ├─ addbook.html
 │  ├─ createCode.html
 │  ├─ css
@@ -56,6 +60,8 @@ star-up
 ├─ routes
 │  ├─ authRoutes.js
 │  └─ bookRoutes.js
-└─ server.js
+├─ server.js
+└─ utils
+   └─ sendEmail.js
 
 ```
