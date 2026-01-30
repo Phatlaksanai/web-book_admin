@@ -60,7 +60,17 @@ app.use("/api/books", bookRoutes);
 app.get("/", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+app.get("/library", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "library.html"));
+});
 
+app.get("/addbook", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "addbook.html"));
+});
+
+app.get("/createCode", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "createCode.html"));
+});
 app.get("/addadmin", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "addAdmin.html"));
 });
