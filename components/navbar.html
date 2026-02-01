@@ -23,13 +23,55 @@
         <li class="nav-item">
           <a class="nav-link" href="/createCode">CreateCode</a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a class="nav-link" href="/addAdmin">Add Admin</a>
-        </li>
+        </li> -->
         <li class="nav-item">
           <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal" title="Settings">
+            ⚙️
+          </a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-0 border-0 shadow">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold">⚙️ Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Font Size -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">ขนาดตัวอักษร (Size)</label>
+          <input type="range" class="form-range" id="setting-fontSize" min="0.8" max="1.4" step="0.05" oninput="updateSetting('fontSize', this.value)">
+        </div>
+
+        <!-- Font Family -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">แบบอักษร (Font)</label>
+          <select class="form-select" id="setting-fontFamily" onchange="updateSetting('fontFamily', this.value)">
+            <option value="'Inter', sans-serif">Inter (Default)</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="'Georgia', serif">Georgia</option>
+            <option value="'Tahoma', sans-serif">Tahoma</option>
+            <option value="'Dancing Script', cursive">Dancing Script</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="resetSettings()">Reset Default</button>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
