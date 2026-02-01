@@ -10,6 +10,8 @@ npm install qrcode
 npm install bwip-js
 npm i jsbarcode canvas
 
+npm install chart.js
+
 have 5 id all pss:1234
 test0@gmail.com
 test1@gmail.com
