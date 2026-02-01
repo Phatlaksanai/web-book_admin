@@ -1,6 +1,7 @@
 const defaultSettings = {
   fontSize: "1",
-  fontFamily: "'Inter', sans-serif"
+  fontFamily: "'Verdana', sans-serif",
+  theme: "y2k"
 };
 
 function loadSettings() {
@@ -14,6 +15,11 @@ function applySettings() {
   
   root.style.setProperty("--font-scale", settings.fontSize);
   root.style.setProperty("--font-family", settings.fontFamily);
+
+  const themeLink = document.getElementById("theme-link");
+  if (themeLink) {
+    themeLink.href = `css/${settings.theme}.css`;
+  }
 }
 
 function updateSetting(key, value) {
@@ -33,9 +39,11 @@ function syncInputs() {
   const settings = loadSettings();
   const fs = document.getElementById("setting-fontSize");
   const ff = document.getElementById("setting-fontFamily");
+  const th = document.getElementById("setting-theme");
   
   if(fs) fs.value = settings.fontSize;
   if(ff) ff.value = settings.fontFamily;
+  if(th) th.value = settings.theme;
 }
 
 // Apply immediately on load

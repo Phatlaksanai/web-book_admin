@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
+
+:root {
+  --bg-color: #c0c0c0; /* Windows 95 Gray */
+  --text-color: #000000;
+  --accent-color: #000080; /* Navy Blue */
+  --font-family: 'Verdana', sans-serif;
+  --font-heading: 'VT323', monospace;
+  --font-scale: 1;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: calc(14px * var(--font-scale));
+  background-color: var(--bg-color) !important;
+  color: var(--text-color);
+  /* Tiled background pattern */
+  background-image: linear-gradient(45deg, #c0c0c0 25%, #dcdcdc 25%, #dcdcdc 50%, #c0c0c0 50%, #c0c0c0 75%, #dcdcdc 75%, #dcdcdc 100%);
+  background-size: 4px 4px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  color: #000080;
+  text-shadow: 2px 2px 0px #fff;
+  letter-spacing: 1px;
+}
+
+.fw-bold { font-weight: bold !important; }
+
+/* Navbar: Gradient Blue Bar */
+.navbar {
+  background: linear-gradient(to right, #000080, #1084d0) !important;
+  border-bottom: 2px solid #fff;
+  box-shadow: 0 4px 0 #000;
+  padding: 10px 0;
+  margin-bottom: 20px;
+}
+
+.navbar-brand {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: #ffff00 !important; /* Yellow */
+  text-shadow: 2px 2px #ff0000;
+  line-height: 1.5;
+}
+
+.nav-link {
+  font-family: 'VT323', monospace;
+  font-size: 1.4rem;
+  color: #fff !important;
+  text-transform: uppercase;
+}
+
+.nav-link:hover {
+  color: #00ff00 !important; /* Lime Green */
+  text-decoration: none;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+/* Cards: Windows 95 Window Style */
+.card {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff; /* 3D Outset */
+  box-shadow: 4px 4px 0px #000;
+  border-radius: 0 !important;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background: #000080; /* Title Bar */
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  padding: 4px 8px;
+  border: none;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.card-img-top {
+  border: 2px solid #808080; /* Inset border */
+  filter: contrast(1.1) saturate(1.2);
+}
+
+/* Buttons: 3D Clickable */
+.btn {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #000 #000 #fff;
+  color: #000;
+  font-family: 'Verdana', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 #000;
+  padding: 5px 15px;
+}
+
+.btn:active {
+  border-color: #000 #fff #fff #000; /* Inset when clicked */
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.btn-primary {
+  background: #000080;
+  color: #fff;
+  border-color: #fff #000 #000 #fff;
+}
+
+.btn-primary:hover {
+  background: #0000ff;
+  color: #fff;
+}
+
+/* Inputs */
+.form-control, .form-select {
+  background: #fff;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080; /* Inset */
+  border-radius: 0 !important;
+  font-family: 'Courier New', monospace;
+}
+
+/* Footer */
+footer {
+  margin-top: 4rem;
+  padding: 1rem 0;
+  background: #000;
+  color: #00ff00; /* Matrix Green */
+  font-family: 'VT323', monospace;
+  text-align: center;
+  font-size: 1.2rem;
+  border-top: 4px solid #c0c0c0;
+}
