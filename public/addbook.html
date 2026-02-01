@@ -2,146 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Add Book | Library Admin</title>
-
-  <!-- Bootstrap -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Add Book</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/swiss.css" />
 </head>
+<body class="bg-light">
 
-<body>
-
-  <!-- ================= NAVBAR (ใช้ layout.js) ================= -->
+  <!-- Navbar -->
   <div id="navbar"></div>
 
-
-  <!-- ================= MAIN CONTENT ================= -->
+  <!-- Main Content -->
   <div class="main-content">
-
-    <div class="container py-4" style="max-width:720px;">
-
-      <!-- ===== Title ===== -->
+    <div class="container mt-5 mb-5" style="max-width: 800px;">
+      
       <div class="text-center mb-4">
-        <h2 id="pageTitle" class="fw-bold">📘 Add Book</h2>
-        <p class="text-muted mb-0">เพิ่มหนังสือเข้าสู่ระบบ</p>
+        <h2 class="fw-bold" id="pageTitle">📖 เพิ่มหนังสือใหม่</h2>
+        <p class="text-muted">กรอกข้อมูลหนังสือเพื่อนำเข้าสู่ระบบ</p>
       </div>
 
-
-      <!-- ===== Card ===== -->
       <div class="card shadow-sm">
         <div class="card-body p-4">
-
-          <p id="create-message" class="text-success fw-bold text-center"></p>
-
-          <!-- Book Title -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Book Title</label>
-            <input
-              id="title"
-              type="text"
-              class="form-control"
-              placeholder="Enter book title"
-            />
-          </div>
-
-
-          <!-- Cover -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Book Cover</label>
-            <input
-              id="cover"
-              type="file"
-              class="form-control"
-              accept="image/*"
-            />
-
-            <div class="text-center mt-3">
-              <img
-                id="coverPreview"
-                style="max-width:160px; display:none; border-radius:12px;"
-                class="shadow-sm"
-              />
+          <form onsubmit="event.preventDefault(); submitBook();">
+            
+            <!-- Title -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">ชื่อหนังสือ</label>
+              <input type="text" id="title" class="form-control" placeholder="ระบุชื่อหนังสือ..." required>
             </div>
-          </div>
 
+            <!-- Detail -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">รายละเอียด</label>
+              <textarea id="detail" class="form-control" rows="4" placeholder="รายละเอียดโดยย่อ..." required></textarea>
+            </div>
 
-          <!-- Detail -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Detail</label>
-            <textarea
-              id="detail"
-              rows="4"
-              class="form-control"
-              placeholder="Enter book detail..."
-            ></textarea>
-          </div>
+            <div class="row">
+              <!-- Cover -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">รูปปก (Cover)</label>
+                <input type="file" id="cover" class="form-control" accept="image/*">
+                <div class="mt-3 text-center bg-light border p-2 d-flex align-items-center justify-content-center" style="height: 200px;">
+                  <img id="coverPreview" src="/images/default-cover.png" style="max-height: 100%; max-width: 100%; display: none;" alt="Preview">
+                  <span class="text-muted small" id="previewText">Preview</span>
+                </div>
+              </div>
 
+              <!-- PDF -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">ไฟล์ PDF</label>
+                <input type="file" id="pdf" class="form-control" accept="application/pdf">
+                <small class="text-muted d-block mt-2" id="pdfFileName"></small>
+                <div class="alert alert-info mt-3 small border-0 bg-light text-dark">
+                  ℹ️ รองรับไฟล์ PDF เท่านั้น
+                </div>
+              </div>
+            </div>
 
-          <!-- PDF -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">Book PDF</label>
-            <input
-              id="pdf"
-              type="file"
-              class="form-control"
-              accept="application/pdf"
-            />
-            <small id="pdfFileName" class="text-muted"></small>
-          </div>
+            <hr class="my-4">
 
-
-          <!-- Submit -->
-          <button 
-            id="submitBtn" 
-            class="btn btn-primary w-100"
-            onclick="submitBook()"
-          >
-            Create Book
-          </button>
-
+            <div class="d-flex justify-content-between align-items-center">
+              <div id="create-message" class="fw-bold"></div>
+              <button type="submit" id="submitBtn" class="btn btn-primary px-4">บันทึกข้อมูล</button>
+            </div>
+          </form>
         </div>
       </div>
-
     </div>
   </div>
 
-
-  <!-- ================= FOOTER ================= -->
+  <!-- Footer -->
   <div id="footer"></div>
 
-
-  <!-- ================= JS ================= -->
-  <script src="js/layout.js"></script>
-  <script src="js/main.js"></script>
-
-  <!-- Preview Cover -->
-  <script>
-    const coverInput = document.getElementById("cover");
-    const preview = document.getElementById("coverPreview");
-
-    coverInput.addEventListener("change", () => {
-      const file = coverInput.files[0];
-      if (!file) return;
-
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = "block";
-    });
-
-    // แสดงชื่อไฟล์ PDF
-    document.getElementById("pdf").addEventListener("change", function () {
-      document.getElementById("pdfFileName").textContent =
-        this.files[0]?.name || "";
-    });
-  </script>
-
-  <!-- Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="js/main.js"></script>
+  <script src="js/layout.js"></script>
 </body>
 </html>
