@@ -27,15 +27,18 @@ async function loadBooks() {
         ${book.detail || "-"}
       </p>
 
-      <div class="d-flex gap-2 justify-content-center">
-        <button class="btn btn-warning btn-sm" onclick="editBook('${book._id}')">
-          Edit
-        </button>
-
-        <button class="btn btn-danger btn-sm" onclick="deleteBook('${book._id}')">
-          Delete
-        </button>
-      </div>
+      ${
+        book.isOwner
+          ? `<div class="d-flex gap-2 justify-content-center">
+               <button class="btn btn-warning btn-sm" onclick="editBook('${book._id}')">
+                 Edit
+               </button>
+               <button class="btn btn-danger btn-sm" onclick="deleteBook('${book._id}')">
+                 Delete
+               </button>
+             </div>`
+          : ""
+      }
     `;
 
     container.appendChild(div);

@@ -85,7 +85,14 @@ exports.getBooks = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    res.json(books);
+    const userId = req.session.user?.id;
+
+    const booksWithFlag = books.map((b) => ({
+      ...b,
+      isOwner: b.addedBy?._id?.toString() === userId,
+    }));
+
+    res.json(booksWithFlag);
   } catch (err) {
     console.error("GET BOOKS ERROR:", err);
     res.status(500).json({ message: "Failed to fetch books" });
@@ -117,6 +124,7 @@ exports.getBookById = async (req, res) => {
 exports.updateBook = async (req, res) => {
   try {
     const id = req.params.id;
+    const userId = req.session.user?.id;
 
     if (!req.body.detail || !req.body.detail.trim()) {
       return res.status(400).json({ message: "Detail is required" });
@@ -139,6 +147,15 @@ exports.updateBook = async (req, res) => {
         url: req.files.pdf[0].path,
         public_id: req.files.pdf[0].filename,
       };
+    }
+
+    // 🔒 Check ownership before update
+    const existingBook = await Book.findById(id);
+    if (!existingBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    if (existingBook.addedBy?.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to update this book" });
     }
 
     const book = await Book.findByIdAndUpdate(
@@ -172,9 +189,14 @@ exports.updateBook = async (req, res) => {
 exports.deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
+    const userId = req.session.user?.id;
 
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (book.addedBy?.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to delete this book" });
     }
 
     await book.deleteOne();
