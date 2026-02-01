@@ -10,17 +10,17 @@ const auth = require("./middleware/auth");
 
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
-
+const adminRoutes = require("./routes/adminRoutes");
 const app = express();
 
-/* CONNECT DATABASE */
+/* CONNECT DB */
 connectDB();
 
 /* CORS */
 app.use(
   cors({
     origin: "http://localhost:2000",
-    credentials: true
+    credentials: true,
   })
 );
 
@@ -28,7 +28,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* SESSION (MongoDB) */
+/* SESSION */
 app.use(
   session({
     name: "connect.sid",
@@ -38,32 +38,28 @@ app.use(
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
       collectionName: "sessions",
-      ttl: 14 * 24 * 60 * 60
     }),
     cookie: {
       httpOnly: true,
-      secure: false, // true เมื่อ deploy https
-      sameSite: "lax"
-    }
+      secure: false,
+      sameSite: "lax",
+    },
   })
 );
+app.use("/api/admin", adminRoutes);
 
-
-/* STATIC FILES */
+/* STATIC */
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
 app.use("/components", express.static(path.join(__dirname, "components")));
 
-/* API ROUTES */
+/* API */
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 
-/* =======================
-   PROTECTED PAGES
-======================= */
+/* PAGES */
 app.get("/", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
 app.get("/library", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "library.html"));
 });
@@ -75,9 +71,11 @@ app.get("/addbook", auth, (req, res) => {
 app.get("/createCode", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "createCode.html"));
 });
+app.get("/addadmin", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "addAdmin.html"));
+});
 
-
-/* START SERVER */
+/* START */
 app.listen(2000, () => {
-  console.log("🚀 Server running at http://localhost:2000");
+  console.log("🚀 http://localhost:2000");
 });

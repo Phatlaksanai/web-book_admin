@@ -24,6 +24,7 @@
     "bcryptjs": "^3.0.3",
     "bwip-js": "^4.8.0",
     "canvas": "^3.2.1",
+    "chart.js": "^4.5.1",
     "cloudinary": "^1.41.3",
     "connect-mongo": "^4.6.0",
     "cors": "^2.8.6",
@@ -35,6 +36,8 @@
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^7.0.13",
+    "otp-generator": "^4.0.1",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

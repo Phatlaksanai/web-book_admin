@@ -6,59 +6,65 @@
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/swiss.css" />
 </head>
 
 <body class="bg-light">
 
-<!-- Navbar -->
+<!-- ✅ Navbar -->
 <div id="navbar"></div>
-
-<div class="container mt-4">
-  <h1>สร้างรหัสหนังสือ</h1>
-
-  <!-- FORM -->
-  <form id="codeForm" class="mb-3">
-    <select id="bookSelect" class="form-select mb-2" required>
-      <option value="">-- เลือกหนังสือ --</option>
-    </select>
-    <button class="btn btn-primary">สร้างรหัส</button>
-  </form>
-
-  <hr>
-
-  <!-- TABLE -->
-  <h2>รหัสที่สร้างแล้ว</h2>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>รหัส</th>
-        <th>หนังสือ</th>
-        <th>สถานะ</th>
-        <th>วันที่</th>
-        <th>เครื่องมือ</th>
-      </tr>
-    </thead>
-    <tbody id="codeTable"></tbody>
-  </table>
-</div>
-
-<!-- MODAL -->
-<div class="modal fade" id="codeModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">QR Code / Barcode</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- ✅ Content (เหมือน AddBook เป๊ะ) -->
+<div class="main-content">
+  <div class="container mt-5" style="max-width:1000px;">
+    <!-- TITLE -->
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">📚 จัดการรหัสหนังสือ</h2>
+      <p class="text-muted">สร้าง QR Code / Barcode สำหรับหนังสือ</p>
+    </div>
+    <!-- ===== CREATE CARD ===== -->
+    <div class="card shadow mb-4">
+      <div class="card-body">
+        <h5 class="mb-3">➕ สร้างรหัสใหม่</h5>
+        <!-- select + button แถวเดียว -->
+        <form id="codeForm">
+          <div class="row g-2 align-items-stretch">
+            <div class="col-md-9">
+              <select id="bookSelect" class="form-select h-100" required>
+                <option value="">-- เลือกหนังสือ --</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex">
+              <button class="btn btn-primary w-100 h-100">
+                สร้างรหัส
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-      <div class="modal-body text-center">
-        <div id="qrBox" class="mb-3"></div>
-        <svg id="barcode"></svg>
+    </div>
+    <!-- ===== TABLE CARD ===== -->
+    <div class="card shadow">
+      <div class="card-body">
+        <h5 class="mb-3">📋 รหัสที่สร้างแล้ว</h5>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover text-center align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>รหัส</th>
+                <th>หนังสือ</th>
+                <th>สถานะ</th>
+                <th>วันที่</th>
+                <th>เครื่องมือ</th>
+              </tr>
+            </thead>
+            <tbody id="codeTable"></tbody>
+          </table>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
-
 <!-- Footer -->
 <div id="footer"></div>
 

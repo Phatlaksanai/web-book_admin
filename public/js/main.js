@@ -1,6 +1,6 @@
-/* =======================
-   🚀 INIT AFTER DOM READY
-======================= */
+/* =========================
+   INIT
+========================= */
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const editId = params.get("id");
@@ -8,28 +8,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitBtn = document.getElementById("submitBtn");
   const pageTitle = document.getElementById("pageTitle");
 
-  if (editId && submitBtn) {
+  /* =====================
+     EDIT MODE
+  ===================== */
+  if (editId) {
     submitBtn.innerText = "Update Book";
-    pageTitle.innerText = "✏️ Edit Book";
+
+    if (pageTitle) {
+      pageTitle.innerText = "✏️ Edit Book";
+    }
+
     loadBookData(editId);
   }
+
+  /* preview cover */
+  document.getElementById("cover")?.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const preview = document.getElementById("coverPreview");
+      preview.src = reader.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  });
 });
 
 
-/* =======================
-   🔘 SUBMIT (CREATE / UPDATE)
-======================= */
+/* =========================
+   SUBMIT
+========================= */
 function submitBook() {
-  const params = new URLSearchParams(window.location.search);
-  const editId = params.get("id");
+  const id = new URLSearchParams(location.search).get("id");
 
-  if (editId) {
-    updateBook(editId);
-  } else {
-    createBook();
-  }
+  if (id) updateBook(id);
+  else createBook();
 }
 
+
+/* =========================
+   MESSAGE
+========================= */
 function showMessage(text, color = "green") {
   const el = document.getElementById("create-message");
   if (!el) return;
@@ -41,24 +62,12 @@ function showMessage(text, color = "green") {
 }
 
 
-/* =======================
-   ➕ CREATE BOOK
-======================= */
+/* =========================
+   CREATE
+========================= */
 async function createBook() {
-  const title = document.getElementById("title").value;
-  const detail = document.getElementById("detail").value;
-  const cover = document.getElementById("cover").files[0];
-  const pdf = document.getElementById("pdf").files[0];
 
-  if (!title || !detail || !pdf) {
-    return showMessage("กรุณากรอกข้อมูลให้ครบ", "red");
-  }
-
-  const formData = new FormData();
-  formData.append("title", title);
-  formData.append("detail", detail);
-  if (cover) formData.append("cover", cover);
-  formData.append("pdf", pdf);
+  const formData = getFormData();
 
   try {
     const res = await fetch("/api/books", {
@@ -67,40 +76,23 @@ async function createBook() {
       body: formData
     });
 
-    const result = await res.json();
+    if (!res.ok) return showMessage("❌ Error", "red");
 
-    if (!res.ok) {
-      return showMessage(result.message, "red");
-    }
-
-    showMessage("✅ สร้างหนังสือสำเร็จ");
+    showMessage("✅ Created");
     clearForm();
 
-  } catch (err) {
-    console.error(err);
-    showMessage("❌ เกิดข้อผิดพลาด", "red");
+  } catch {
+    showMessage("❌ Error", "red");
   }
 }
 
 
-/* =======================
-   ✏️ UPDATE BOOK
-======================= */
+/* =========================
+   UPDATE
+========================= */
 async function updateBook(id) {
-  const title = document.getElementById("title").value;
-  const detail = document.getElementById("detail").value;
-  const cover = document.getElementById("cover").files[0];
-  const pdf = document.getElementById("pdf").files[0];
 
-  if (!title || !detail) {
-    return showMessage("กรุณากรอกข้อมูลให้ครบ", "red");
-  }
-
-  const formData = new FormData();
-  formData.append("title", title);
-  formData.append("detail", detail);
-  if (cover) formData.append("cover", cover);
-  if (pdf) formData.append("pdf", pdf);
+  const formData = getFormData();
 
   try {
     const res = await fetch("/api/books/" + id, {
@@ -109,28 +101,27 @@ async function updateBook(id) {
       body: formData
     });
 
-    const result = await res.json();
+    if (!res.ok) return showMessage("❌ Error", "red");
 
-    if (!res.ok) {
-      return showMessage(result.message, "red");
-    }
+    showMessage("✅ Updated");
 
-    showMessage("✅ แก้ไขสำเร็จ");
-    setTimeout(() => (window.location.href = "/library.html"), 800);
+    setTimeout(() => {
+      location.href = "/library.html";
+    }, 800);
 
-  } catch (err) {
-    console.error(err);
-    showMessage("❌ เกิดข้อผิดพลาด", "red");
+  } catch {
+    showMessage("❌ Error", "red");
   }
 }
 
 
-/* =======================
-   📥 LOAD BOOK (EDIT MODE)
-======================= */
+/* =========================
+   LOAD BOOK (EDIT)
+========================= */
 async function loadBookData(id) {
+
   try {
-    const res = await fetch(`/api/books/${id}`, {
+    const res = await fetch("/api/books/" + id, {
       credentials: "include"
     });
 
@@ -147,74 +138,39 @@ async function loadBookData(id) {
 
     if (book.pdfFile?.url) {
       document.getElementById("pdfFileName").innerText =
-        "Current file: " + book.pdfFile.url.split("/").pop();
+        "Current: " + book.pdfFile.url.split("/").pop();
     }
 
   } catch (err) {
-    console.error("Load book error:", err);
+    console.error(err);
   }
 }
 
 
-/* =======================
-   🧹 CLEAR FORM
-======================= */
+/* =========================
+   HELPERS
+========================= */
+function getFormData() {
+  const title = document.getElementById("title").value;
+  const detail = document.getElementById("detail").value;
+  const cover = document.getElementById("cover").files[0];
+  const pdf = document.getElementById("pdf").files[0];
+
+  const fd = new FormData();
+
+  fd.append("title", title);
+  fd.append("detail", detail);
+
+  if (cover) fd.append("cover", cover);
+  if (pdf) fd.append("pdf", pdf);
+
+  return fd;
+}
+
+
 function clearForm() {
   document.getElementById("title").value = "";
   document.getElementById("detail").value = "";
   document.getElementById("cover").value = "";
   document.getElementById("pdf").value = "";
 }
-
-
-/* =======================
-   🚪 LOGOUT
-======================= */
-document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
-  e.preventDefault();
-
-  await fetch("/api/auth/logout", {
-    method: "POST",
-    credentials: "include"
-  });
-
-  window.location.href = "/login.html";
-});
-
-
-/* =======================
-   📊 DASHBOARD
-======================= */
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const res = await fetch("/api/books/dashboard", {
-      credentials: "include"
-    });
-
-    if (res.status === 401) {
-      return (window.location.href = "/login.html");
-    }
-
-    const data = await res.json();
-
-    document.getElementById("totalBooks").innerText = data.totalBooks;
-    document.getElementById("myBooks").innerText = data.myBooks;
-
-    const table = document.getElementById("historyTable");
-    if (!table) return;
-
-    table.innerHTML = "";
-    data.history.forEach(b => {
-      table.innerHTML += `
-        <tr>
-          <td>${b.title}</td>
-          <td>${b.addedBy?.email || "-"}</td>
-          <td>${new Date(b.createdAt).toLocaleString()}</td>
-        </tr>
-      `;
-    });
-
-  } catch (err) {
-    console.error("Dashboard error:", err);
-  }
-});

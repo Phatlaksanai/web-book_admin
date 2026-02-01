@@ -2,80 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin | Book Code</title>
-
-  <!-- Bootstrap -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Add Book</title>
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/swiss.css" />
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar (shared) -->
-<div id="navbar"></div>
+  <!-- Navbar -->
+  <div id="navbar"></div>
 
-<!-- ✅ Content -->
-<div class="main-content">
-  <div class="container mt-5">
-    <div class="card shadow">
-      <div class="card-body">
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container mt-5 mb-5" style="max-width: 800px;">
+      
+      <div class="text-center mb-4">
+        <h2 class="fw-bold" id="pageTitle">📖 เพิ่มหนังสือใหม่</h2>
+        <p class="text-muted">กรอกข้อมูลหนังสือเพื่อนำเข้าสู่ระบบ</p>
+      </div>
 
-        <h4 id="pageTitle" class="mb-4">📘 Add Book</h4>
-        <p id="create-message" class="text-center mt-3 fw-bold"></p>
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <form onsubmit="event.preventDefault(); submitBook();">
+            
+            <!-- Title -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">ชื่อหนังสือ</label>
+              <input type="text" id="title" class="form-control" placeholder="ระบุชื่อหนังสือ..." required>
+            </div>
 
-        <!-- Book Title -->
-        <div class="mb-3">
-          <label class="form-label">Book Title</label>
-          <input id="title" class="form-control" />
+            <!-- Detail -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">รายละเอียด</label>
+              <textarea id="detail" class="form-control" rows="4" placeholder="รายละเอียดโดยย่อ..." required></textarea>
+            </div>
+
+            <div class="row">
+              <!-- Cover -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">รูปปก (Cover)</label>
+                <input type="file" id="cover" class="form-control" accept="image/*">
+                <div class="mt-3 text-center bg-light border p-2 d-flex align-items-center justify-content-center" style="height: 200px;">
+                  <img id="coverPreview" src="/images/default-cover.png" style="max-height: 100%; max-width: 100%; display: none;" alt="Preview">
+                  <span class="text-muted small" id="previewText">Preview</span>
+                </div>
+              </div>
+
+              <!-- PDF -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">ไฟล์ PDF</label>
+                <input type="file" id="pdf" class="form-control" accept="application/pdf">
+                <small class="text-muted d-block mt-2" id="pdfFileName"></small>
+                <div class="alert alert-info mt-3 small border-0 bg-light text-dark">
+                  ℹ️ รองรับไฟล์ PDF เท่านั้น
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+              <div id="create-message" class="fw-bold"></div>
+              <button type="submit" id="submitBtn" class="btn btn-primary px-4">บันทึกข้อมูล</button>
+            </div>
+          </form>
         </div>
-
-        <!-- Book Cover -->
-        <div class="mb-3">
-          <label class="form-label">Book Cover</label>
-          <input type="file" id="cover" class="form-control" accept="image/*" />
-          <img id="coverPreview" style="max-width:150px;margin-top:10px;display:none;">
-        </div>
-
-        <!-- Detail -->
-        <div class="mb-3">
-          <label class="form-label">Detail</label>
-          <textarea
-            id="detail"
-            class="form-control"
-            rows="4"
-            placeholder="Enter book detail..."
-          ></textarea>
-        </div>
-
-        <!-- Book PDF -->
-        <div class="mb-3">
-          <label class="form-label">Book PDF</label>
-          <input type="file" id="pdf" class="form-control" accept="application/pdf" />
-          <small id="pdfFileName" class="text-muted"></small>
-        </div>
-
-        <button id="submitBtn" class="btn btn-primary w-100" onclick="submitBook()">
-          Create Book
-        </button>
-
       </div>
     </div>
   </div>
-</div>
 
-<div id="footer"></div>
+  <!-- Footer -->
+  <div id="footer"></div>
 
-<script src="js/layout.js"></script>
-<script src="js/main.js"></script>
-
-<!-- แสดงชื่อไฟล์ PDF -->
-<script>
-  document.getElementById("pdf").addEventListener("change", function () {
-    document.getElementById("pdfFileName").textContent =
-      this.files[0]?.name || "";
-  });
-</script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/layout.js"></script>
 </body>
 </html>

@@ -19,24 +19,24 @@ body {
   min-height: 100vh;
 }
 
-/* content หลักของทุกหน้า (ดัน footer ลงล่าง) */
-.main-content {
-  flex: 1 0 auto;
-  padding-top: 80px;
-}
-
 /* ===== Navbar ===== */
-.navbar {
-  position: fixed;
+.navbar,
+.custom-navbar {
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
+  z-index: 1000;
+
   height: 60px;
   background: #2c3e50;
-  padding: 15px 30px;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
+}
+
+/* ===== Content ===== */
+.main-content {
+  flex: 1;
+  padding: 0 20px 20px;   /* ❌ เอา padding-top ออก */
 }
 
 .navbar h2 {
@@ -267,7 +267,63 @@ body {
 .library-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 20px;
+}
+/* =================================================
+   FOOTER ⭐ เหมือน CreateCode
+================================================= */
+#footer {
+  margin-top: auto;
+
+  background: #2c3e50;
+  color: #fff;
+
+  text-align: center;
+  padding: 15px;
+
+  font-size: 14px;
+}
+
+/* ================= NAVBAR NEW STYLE ================= */
+
+.custom-navbar {
+  background: #2c3e50 !important;
+  height: 60px;
+  padding: 0 20px;
+}
+
+/* logo */
+.brand-title {
+  color: #83eea9;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* ปุ่มเมนู */
+.nav-btn {
+  font-size: 17px;     /* ⭐ ใหญ่ขึ้น */
+  font-weight: 700;    /* ⭐ หนาขึ้น */
+
+  color: white !important;
+
+  background: #e74c3c;
+  border-radius: 8px;
+
+  padding: 7px 14px !important;
+  margin-left: 8px;
+
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  background: #c0392b;
+}
+
+/* ⭐ ACTIVE PAGE */
+.nav-btn.active {
+  background: white !important;
+  color: #e74c3c !important;
 }
 
 

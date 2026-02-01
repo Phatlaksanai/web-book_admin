@@ -2,72 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin | Book Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Dashboard</title>
 
-  <!-- Bootstrap -->
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/swiss.css" />
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar (shared) -->
-<div id="navbar"></div>
+  <!-- Navbar (Loaded via JS) -->
+  <div id="navbar"></div>
 
-<!-- ✅ Content (สำคัญมาก) -->
-<div class="main-content">
-  <div class="container mt-5">
-    <div class="card shadow">
-      <div class="card-body">
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container mt-5 mb-5" style="max-width: 1000px;">
+      
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">📊 Dashboard</h2>
+        <a href="/addbook" class="btn btn-primary shadow-sm">
+          + เพิ่มหนังสือใหม่
+        </a>
+      </div>
 
-        <div class="row g-3 mt-3">
-          <div class="col-md-4">
-            <div class="card shadow-sm text-center">
-              <div class="card-body">
-                <h6>📚 Books in System</h6>
-                <h2 id="totalBooks">0</h2>
+      <!-- Stats Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                    หนังสือทั้งหมด (Total)
+                  </div>
+                  <div class="h3 mb-0 fw-bold text-gray-800" id="totalBooks">...</div>
+                </div>
+                <div class="col-auto">
+                  <h2 class="text-gray-300">📚</h2>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="col-md-4">
-            <div class="card shadow-sm text-center">
-              <div class="card-body">
-                <h6>📖 My Added Books</h6>
-                <h2 id="myBooks">0</h2>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                    หนังสือของฉัน (My Books)
+                  </div>
+                  <div class="h3 mb-0 fw-bold text-gray-800" id="myBooks">...</div>
+                </div>
+                <div class="col-auto">
+                  <h2 class="text-gray-300">👤</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Row -->
+      <div class="row g-4">
+        
+        <!-- Chart -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 mb-4 h-100">
+            <div class="card-header py-3 bg-white d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 fw-bold text-primary">สัดส่วนหนังสือ</h6>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="position: relative; height: 250px; width: 100%;">
+                <canvas id="bookChart"></canvas>
               </div>
             </div>
           </div>
         </div>
 
         <!-- History -->
-        <div class="card shadow-sm mt-4">
-          <div class="card-body">
-            <h5>🕒 Add History</h5>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody id="historyTable"></tbody>
-            </table>
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 mb-4 h-100">
+            <div class="card-header py-3 bg-white">
+              <h6 class="m-0 fw-bold text-primary">ประวัติการเพิ่มล่าสุด</h6>
+            </div>
+            <ul class="list-group list-group-flush" id="historyList">
+              <li class="list-group-item text-center py-3">Loading...</li>
+            </ul>
           </div>
         </div>
+
       </div>
+
     </div>
   </div>
-</div>
 
-<!-- ✅ Footer (shared) -->
-<div id="footer"></div>
+  <!-- Footer -->
+  <div id="footer"></div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/layout.js"></script>
-<script src="js/main.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- App Scripts -->
+  <script src="js/layout.js"></script>
+  <script src="js/dashboard.js"></script>
 
 </body>
 </html>
