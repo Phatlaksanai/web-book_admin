@@ -23,9 +23,6 @@
         <li class="nav-item">
           <a class="nav-link" href="/createCode">CreateCode</a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link" href="/addAdmin">Add Admin</a>
-        </li> -->
         <li class="nav-item">
           <a class="nav-link" href="#" id="logoutBtn">Logout</a>
         </li>
@@ -61,6 +58,7 @@
           <select class="form-select" id="setting-theme" onchange="updateSetting('theme', this.value)">
             <option value="y2k">Y2K Style</option>
             <option value="swiss">Swiss Style</option>
+            <option value="retro">Retro Style</option>
           </select>
         </div>
 
@@ -68,6 +66,8 @@
         <div class="mb-3">
           <label class="form-label fw-bold">แบบอักษร (Font)</label>
           <select class="form-select" id="setting-fontFamily" onchange="updateSetting('fontFamily', this.value)">
+            <option value="'Shrikhand', cursive">Shrikhand (Retro)</option>
+            <option value="'Courier Prime', monospace">Courier Prime (Retro)</option>
             <option value="'Verdana', sans-serif">Verdana (Y2K Default)</option>
             <option value="'VT323', monospace">VT323 (Pixel)</option>
             <option value="'Press Start 2P', cursive">8-Bit</option>
