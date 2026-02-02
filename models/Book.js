@@ -8,6 +8,12 @@ const bookSchema = new mongoose.Schema(
       trim: true,
     },
 
+    titleNormalized: { // กันชื่อซ้ำแบบไม่สนตัวใหญ่เล็ก
+      type: String,
+      unique: true,
+      required: true,
+    },
+
     bookCode: {
       type: String,
       required: true,
@@ -37,6 +43,18 @@ const bookSchema = new mongoose.Schema(
       public_id: String,
     },
 
+    coverHash: {  // hash ปกห้ามซ้ำ
+      type: String,
+      unique: true,
+      sparse: true, // allow null
+    },
+
+    pdfHash: {  // hash pdf ห้ามซ้ำ
+      type: String,
+      unique: true,
+      required: true,
+    },
+
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
@@ -46,5 +64,17 @@ const bookSchema = new mongoose.Schema(
     timestamps: true, // ✅ สร้าง createdAt / updatedAt ให้อัตโนมัติ
   },
 );
+
+// ✅ Normalize title ก่อน save ทุกครั้ง
+bookSchema.pre("save", async function () {
+  if (this.title) {
+    this.titleNormalized = this.title
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/[-_.]/g, "")
+      .trim();
+  }
+});
+
 
 module.exports = mongoose.model("Book", bookSchema);

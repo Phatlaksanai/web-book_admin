@@ -28,6 +28,7 @@
     "cloudinary": "^1.41.3",
     "connect-mongo": "^4.6.0",
     "cors": "^2.8.6",
+    "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.19.0",

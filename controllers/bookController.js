@@ -3,77 +3,163 @@ const BookCode = require("../models/BookCode");
 const cloudinary = require("../config/cloudinary");
 const QRCode = require("qrcode");
 const bwipjs = require("bwip-js");
+const crypto = require("crypto");
 
+const normalizeTitle = (title) => {
+  return title
+    .toLowerCase()
+    .replace(/\s+/g, "") // remove spaces
+    .replace(/[-_.]/g, "") // remove - _ .
+    .trim();
+};
 /* =========================
    ➕ CREATE BOOK
 ========================= */
 exports.createBook = async (req, res) => {
   try {
-    // 🔐 check session
     if (!req.session.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // ✅ validate detail
-    if (!req.body.detail || !req.body.detail.trim()) {
-      return res.status(400).json({ message: "Detail is required" });
+    const title = req.body.title?.trim();
+    const detail = req.body.detail?.trim();
+
+    if (!title) return res.status(400).json({ message: "Title is required" });
+
+    if (!detail) return res.status(400).json({ message: "Detail is required" });
+
+    // ===============================
+    // ✅ 1) TITLE ต้องไม่ซ้ำ
+    // ===============================
+    const normalized = normalizeTitle(title);
+
+    const titleExists = await Book.findOne({
+      titleNormalized: normalized,
+    });
+
+    if (titleExists) {
+      return res.status(400).json({
+        message: "❌ ชื่อเรื่องซ้ำ กรุณาใส่ vol.1 / vol.2 ให้ชัดเจน",
+      });
     }
 
-    // ✅ validate pdf
-    if (!req.files?.pdf || req.files.pdf.length === 0) {
+    // ===============================
+    // ✅ 2) PDF ต้องไม่ซ้ำ
+    // ===============================
+    if (!req.files?.pdf?.length)
       return res.status(400).json({ message: "PDF file is missing" });
+
+    const pdfBuffer = req.files.pdf[0].buffer;
+
+    const pdfHash = crypto.createHash("sha256").update(pdfBuffer).digest("hex");
+
+    const pdfExists = await Book.findOne({ pdfHash });
+
+    if (pdfExists) {
+      return res.status(400).json({
+        message: "❌ PDF นี้ถูกอัปโหลดแล้ว",
+      });
     }
 
-    // 🔢 generate bookCode
-    const lastBook = await Book.findOne({ bookCode: { $exists: true } })
+    // ===============================
+    // ✅ 3) COVER ต้องไม่ซ้ำ
+    // ===============================
+    let coverUploadResult = null;
+    let coverHash = null;
+
+    if (req.files?.cover?.length) {
+      const coverBuffer = req.files.cover[0].buffer;
+
+      coverHash = crypto.createHash("sha256").update(coverBuffer).digest("hex");
+
+      const coverExists = await Book.findOne({ coverHash });
+
+      if (coverExists) {
+        return res.status(400).json({
+          message: "❌ รูปปกนี้ถูกใช้แล้ว",
+        });
+      }
+
+      coverUploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream({ folder: "books/covers" }, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          })
+          .end(coverBuffer);
+      });
+    }
+
+    // ===============================
+    // ✅ Upload PDF
+    // ===============================
+    const pdfUploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { folder: "books/pdf", resource_type: "raw" },
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          },
+        )
+        .end(pdfBuffer);
+    });
+
+    // ===============================
+    // ✅ Generate bookCode
+    // ===============================
+    const lastBook = await Book.findOne()
       .sort({ createdAt: -1 })
       .select("bookCode");
 
     let nextNumber = 1;
     if (lastBook?.bookCode) {
-      const lastNumber = parseInt(lastBook.bookCode.split("-")[1], 10);
-      if (!isNaN(lastNumber)) nextNumber = lastNumber + 1;
+      nextNumber = parseInt(lastBook.bookCode.split("-")[1]) + 1;
     }
 
     const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
 
-    // 🖼 cover (optional)
-    const coverImage = req.files.cover?.length
-      ? {
-          url: req.files.cover[0].path,
-          public_id: req.files.cover[0].filename,
-        }
-      : undefined;
-
-    // 📘 create book
+    // ===============================
+    // ✅ Save Book
+    // ===============================
     const book = await Book.create({
-      title: req.body.title?.trim(),
-      detail: req.body.detail.trim(),
+      title,
+      titleNormalized: normalized, 
+      detail,
       bookCode,
-      coverImage,
+      pdfHash,
       pdfFile: {
-        url: req.files.pdf[0].path,
-        public_id: req.files.pdf[0].filename,
+        url: pdfUploadResult.secure_url,
+        public_id: pdfUploadResult.public_id,
       },
+
+      coverHash,
+      coverImage: coverUploadResult
+        ? {
+            url: coverUploadResult.secure_url,
+            public_id: coverUploadResult.public_id,
+          }
+        : undefined,
+
       addedBy: req.session.user.id,
     });
 
-    return res.status(201).json({
-      message: "Book created successfully",
+    res.status(201).json({
+      message: "✅ Book created successfully",
       book,
     });
-
   } catch (err) {
     console.error("CREATE BOOK ERROR:", err);
 
     if (err.code === 11000) {
-      return res.status(409).json({ message: "Book code already exists" });
+      return res.status(409).json({
+        message: "❌ Duplicate detected (title/pdf/cover)",
+      });
     }
 
-    return res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 /* =========================
    📚 GET ALL BOOKS
@@ -131,7 +217,6 @@ exports.getBooks = async (req, res) => {
   }
 };
 
-
 /* =========================
    📘 GET BOOK BY ID
 ========================= */
@@ -148,7 +233,6 @@ exports.getBookById = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 /* =========================
    ✏️ UPDATE BOOK
@@ -187,13 +271,15 @@ exports.updateBook = async (req, res) => {
       return res.status(404).json({ message: "Book not found" });
     }
     if (existingBook.addedBy?.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized to update this book" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this book" });
     }
 
     const book = await Book.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!book) {
@@ -203,17 +289,15 @@ exports.updateBook = async (req, res) => {
     // 🔁 sync title in BookCode
     await BookCode.updateMany(
       { bookId: id },
-      { $set: { bookTitle: updateData.title } }
+      { $set: { bookTitle: updateData.title } },
     );
 
     res.json(book);
-
   } catch (err) {
     console.error("UPDATE BOOK ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
-
 
 /* =========================
    ❌ DELETE BOOK
@@ -228,27 +312,25 @@ exports.deleteBook = async (req, res) => {
     }
 
     if (book.addedBy?.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized to delete this book" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this book" });
     }
 
     await book.deleteOne();
     res.json({ message: "Book deleted successfully" });
-
   } catch (err) {
     console.error("DELETE BOOK ERROR:", err);
     res.status(500).json({ message: "Failed to delete book" });
   }
 };
 
-
 /* =========================
    🔑 GET BOOK CODES
 ========================= */
 exports.getBookCodes = async (req, res) => {
   try {
-    const codes = await BookCode.find()
-      .sort({ createdAt: -1 })
-      .lean();
+    const codes = await BookCode.find().sort({ createdAt: -1 }).lean();
 
     res.json(codes);
   } catch (err) {
@@ -256,7 +338,6 @@ exports.getBookCodes = async (req, res) => {
     res.status(500).json({ message: "Load codes failed" });
   }
 };
-
 
 /* =========================
    🔑 CREATE BOOK CODE
@@ -269,10 +350,7 @@ exports.createBookCode = async (req, res) => {
       return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
     }
 
-    const code = Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     await BookCode.create({
       code,
@@ -287,7 +365,6 @@ exports.createBookCode = async (req, res) => {
     res.status(500).json({ message: "Create code failed" });
   }
 };
-
 
 /* =========================
    🔳 GENERATE QR CODE
@@ -307,13 +384,12 @@ exports.generateQRCode = async (req, res) => {
     });
 
     const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "book-qrcode" },
-        (error, result) => {
+      cloudinary.uploader
+        .upload_stream({ folder: "book-qrcode" }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
-      ).end(qrBuffer);
+        })
+        .end(qrBuffer);
     });
 
     bookCode.qrImage = {
@@ -325,7 +401,6 @@ exports.generateQRCode = async (req, res) => {
 
     const updatedCode = await BookCode.findById(codeId).lean();
     res.json(updatedCode);
-
   } catch (err) {
     console.error("GENERATE QR ERROR:", err);
     res.status(500).json({ message: "Generate QR failed" });
@@ -361,13 +436,12 @@ exports.generateBarcode = async (req, res) => {
 
     // 2️⃣ upload cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "book-barcode" },
-        (error, result) => {
+      cloudinary.uploader
+        .upload_stream({ folder: "book-barcode" }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
-      ).end(png);
+        })
+        .end(png);
     });
 
     // 3️⃣ save db
@@ -379,7 +453,6 @@ exports.generateBarcode = async (req, res) => {
 
     const updatedCode = await BookCode.findById(codeId).lean();
     res.json(updatedCode);
-
   } catch (err) {
     console.error("GENERATE BARCODE ERROR:", err);
     res.status(500).json({ message: "Generate barcode failed" });
@@ -416,7 +489,6 @@ exports.getDashboardData = async (req, res) => {
       usedCodes,
       history,
     });
-
   } catch (err) {
     console.error("DASHBOARD ERROR:", err);
     res.status(500).json({ message: err.message });
