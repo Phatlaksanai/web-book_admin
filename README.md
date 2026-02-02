@@ -12,6 +12,8 @@ npm i jsbarcode canvas
 
 npm install chart.js
 
+npm install winston winston-mongodb
+
 have 5 id all pss:1234
 test0@gmail.com
 test1@gmail.com

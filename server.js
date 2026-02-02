@@ -8,6 +8,7 @@ const path = require("path");
 const connectDB = require("./config/db");
 const auth = require("./middleware/auth");
 
+const logger = require("./utils/logger");
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -46,6 +47,16 @@ app.use(
     },
   })
 );
+
+/* LOGGER MIDDLEWARE */
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.url}`, {
+    ip: req.ip,
+    user: req.session?.user?.email || "Guest",
+  });
+  next();
+});
+
 app.use("/api/admin", adminRoutes);
 
 /* STATIC */
