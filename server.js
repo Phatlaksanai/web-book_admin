@@ -10,7 +10,6 @@ const auth = require("./middleware/auth");
 
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
-const adminRoutes = require("./routes/adminRoutes");
 const app = express();
 
 /* CONNECT DB */
@@ -46,7 +45,6 @@ app.use(
     },
   })
 );
-app.use("/api/admin", adminRoutes);
 
 /* STATIC */
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
