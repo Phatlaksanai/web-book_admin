@@ -32,6 +32,11 @@ async function loadBooks() {
             ${book.detail || "-"}
           </p>
 
+          <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded border">
+             <small class="text-muted">Codes: <span class="fw-bold text-dark">${book.totalCodes}</span></small>
+             <small class="text-muted">Used: <span class="fw-bold text-success">${book.usedCodes}</span></small>
+          </div>
+
           ${
             book.isOwner
               ? `<div class="d-flex gap-2 mt-3 pt-3 border-top">
