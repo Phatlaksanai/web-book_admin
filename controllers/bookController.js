@@ -80,19 +80,51 @@ exports.createBook = async (req, res) => {
 ========================= */
 exports.getBooks = async (req, res) => {
   try {
-    const books = await Book.find({})
-      .populate("addedBy", "email")
-      .sort({ createdAt: -1 })
-      .lean();
-
     const userId = req.session.user?.id;
 
-    const booksWithFlag = books.map((b) => ({
-      ...b,
-      isOwner: b.addedBy?._id?.toString() === userId,
-    }));
+    const books = await Book.aggregate([
+      {
+        $lookup: {
+          from: "bookcodes",
+          localField: "_id",
+          foreignField: "bookId",
+          as: "codes",
+        },
+      },
+      {
+        $lookup: {
+          from: "admins",
+          localField: "addedBy",
+          foreignField: "_id",
+          as: "addedBy",
+        },
+      },
+      {
+        $unwind: {
+          path: "$addedBy",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          totalCodes: { $size: "$codes" },
+          usedCodes: {
+            $size: {
+              $filter: {
+                input: "$codes",
+                as: "code",
+                cond: { $eq: ["$$code.used", true] },
+              },
+            },
+          },
+          isOwner: { $eq: [{ $toString: "$addedBy._id" }, userId] },
+        },
+      },
+      { $project: { codes: 0, "addedBy.password": 0 } },
+      { $sort: { createdAt: -1 } },
+    ]);
 
-    res.json(booksWithFlag);
+    res.json(books);
   } catch (err) {
     console.error("GET BOOKS ERROR:", err);
     res.status(500).json({ message: "Failed to fetch books" });
@@ -368,6 +400,9 @@ exports.getDashboardData = async (req, res) => {
     const totalBooks = await Book.countDocuments();
     const myBooks = await Book.countDocuments({ addedBy: userId });
 
+    const totalCodes = await BookCode.countDocuments();
+    const usedCodes = await BookCode.countDocuments({ used: true });
+
     const history = await Book.find({ addedBy: userId })
       .populate("addedBy", "email")
       .sort({ createdAt: -1 })
@@ -377,6 +412,8 @@ exports.getDashboardData = async (req, res) => {
     res.json({
       totalBooks,
       myBooks,
+      totalCodes,
+      usedCodes,
       history,
     });
 

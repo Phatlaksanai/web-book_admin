@@ -12,6 +12,8 @@ npm i jsbarcode canvas
 
 npm install chart.js
 
+npm install winston winston-mongodb
+
 have 5 id all pss:1234
 test0@gmail.com
 test1@gmail.com
@@ -30,6 +32,7 @@ star-up
 │  ├─ cloudinary.js
 │  └─ db.js
 ├─ controllers
+│  ├─ adminController.js
 │  ├─ authController.js
 │  └─ bookController.js
 ├─ middleware
@@ -47,19 +50,26 @@ star-up
 │  ├─ addbook.html
 │  ├─ createCode.html
 │  ├─ css
-│  │  └─ style.css
+│  │  ├─ retro.css
+│  │  ├─ style.css
+│  │  ├─ swiss.css
+│  │  └─ y2k.css
 │  ├─ images
 │  │  └─ default-cover.png
 │  ├─ index.html
 │  ├─ js
 │  │  ├─ createCode.js
+│  │  ├─ dashboard.js
+│  │  ├─ index.js
 │  │  ├─ layout.js
 │  │  ├─ library.js
-│  │  └─ main.js
+│  │  ├─ main.js
+│  │  └─ settings.js
 │  ├─ library.html
 │  ├─ login.html
 │  └─ register.html
 ├─ routes
+│  ├─ adminRoutes.js
 │  ├─ authRoutes.js
 │  └─ bookRoutes.js
 ├─ server.js

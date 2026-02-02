@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Shrikhand&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg-color: #fdf6e3; /* Cream */
+  --text-color: #5d4037; /* Brown */
+  --heading-color: #d84315; /* Burnt Orange */
+  --accent-color: #00897b; /* Teal */
+  --border-color: #5d4037;
+  --font-family: 'Courier Prime', monospace;
+  --font-heading: 'Shrikhand', cursive;
+  --font-scale: 1;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: calc(1rem * var(--font-scale));
+  background-color: var(--bg-color) !important;
+  color: var(--text-color);
+  /* Dot pattern background */
+  background-image: radial-gradient(#d7ccc8 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--heading-color);
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+  transform: rotate(-1deg); /* Slight tilt for fun */
+}
+
+.fw-bold { font-weight: 700 !important; }
+
+/* Navbar */
+.navbar {
+  background-color: #fff8e1 !important;
+  border-bottom: 4px dashed var(--heading-color);
+  padding: 1rem 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--heading-color) !important;
+  text-shadow: 3px 3px 0px #ffccbc;
+}
+
+.nav-link {
+  font-family: var(--font-family);
+  font-weight: bold;
+  color: var(--text-color) !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-link:hover {
+  color: var(--accent-color) !important;
+  text-decoration: underline wavy var(--accent-color);
+}
+
+/* Cards */
+.card {
+  background-color: #fff;
+  border: 2px solid var(--border-color);
+  border-radius: 15px !important;
+  box-shadow: 6px 6px 0px var(--border-color);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 10px 10px 0px var(--heading-color);
+  border-color: var(--heading-color);
+}
+
+.card-header {
+  background-color: #ffecb3;
+  border-bottom: 2px solid var(--border-color);
+  font-family: var(--font-heading);
+  color: var(--text-color);
+  font-size: 1.2rem;
+}
+
+.card-img-top {
+  border-bottom: 2px solid var(--border-color);
+  filter: sepia(0.3) contrast(1.1);
+  transition: filter 0.3s;
+}
+
+.card:hover .card-img-top {
+  filter: sepia(0) contrast(1);
+}
+
+/* Buttons */
+.btn {
+  border-radius: 50px !important;
+  font-family: var(--font-family);
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 2px solid var(--border-color);
+  box-shadow: 3px 3px 0px var(--border-color);
+  transition: all 0.2s;
+  padding: 0.5rem 1.5rem;
+}
+
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px var(--border-color);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--border-color);
+}
+
+.btn-primary {
+  background-color: var(--heading-color);
+  color: #fff;
+  border-color: var(--border-color);
+}
+
+.btn-primary:hover {
+  background-color: #bf360c;
+  color: #fff;
+}
+
+/* Footer */
+footer {
+  margin-top: 4rem;
+  padding: 2rem 0;
+  border-top: 4px double var(--border-color);
+  text-align: center;
+  font-family: var(--font-heading);
+  color: var(--text-color);
+  font-size: 1.2rem;
+}

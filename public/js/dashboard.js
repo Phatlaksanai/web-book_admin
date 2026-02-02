@@ -1,18 +1,29 @@
+let chartInstance = null;
+let dashboardData = null;
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // 1. Fetch Data
     const res = await fetch("/api/books/dashboard");
     if (!res.ok) throw new Error("Failed to fetch dashboard data");
     
-    const data = await res.json();
-    const { totalBooks, myBooks, history } = data;
+    dashboardData = await res.json();
+    const { totalBooks, myBooks, history } = dashboardData;
 
     // 2. Update Stats Cards
     document.getElementById("totalBooks").innerText = totalBooks;
     document.getElementById("myBooks").innerText = myBooks;
 
     // 3. Render Chart
-    renderChart(totalBooks, myBooks);
+    renderChart("books");
+
+    // Listener for KPI selection
+    const selector = document.getElementById("chartType");
+    if (selector) {
+      selector.addEventListener("change", (e) => {
+        renderChart(e.target.value);
+      });
+    }
 
     // 4. Render History List
     renderHistory(history);
@@ -22,20 +33,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-function renderChart(total, my) {
+function renderChart(type) {
   const ctx = document.getElementById("bookChart");
-  if (!ctx) return;
+  if (!ctx || !dashboardData) return;
 
-  const others = total - my;
+  // Destroy previous chart
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
 
-  new Chart(ctx, {
+  let labels, data, colors;
+
+  if (type === "books") {
+    const { totalBooks, myBooks } = dashboardData;
+    const others = totalBooks - myBooks;
+    labels = ["หนังสือของฉัน", "หนังสือคนอื่น"];
+    data = [myBooks, others];
+    colors = ["#4e73df", "#e74a3b"];
+  } else if (type === "codes") {
+    const { totalCodes, usedCodes } = dashboardData;
+    const available = totalCodes - usedCodes;
+    labels = ["ถูกใช้แล้ว (Used)", "ยังไม่ใช้ (Available)"];
+    data = [usedCodes, available];
+    colors = ["#1cc88a", "#f6c23e"];
+  }
+
+  chartInstance = new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels: ["หนังสือของฉัน", "หนังสือคนอื่น"],
+      labels: labels,
       datasets: [{
-        data: [my, others],
-        backgroundColor: ["#4e73df", "#e74a3b"], // Blue, Red
-        hoverBackgroundColor: ["#2e59d9", "#e02d1b"],
+        data: data,
+        backgroundColor: colors,
+        hoverBackgroundColor: colors,
         hoverBorderColor: "rgba(234, 236, 244, 1)",
       }],
     },
