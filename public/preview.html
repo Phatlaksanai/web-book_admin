@@ -56,8 +56,13 @@
   <div class="controls">
     <a href="/library.html" class="btn btn-sm btn-outline-light rounded-pill px-3">Back</a>
     <button class="btn btn-sm btn-light rounded-circle" onclick="prevPage()">❮</button>
-    <span class="mx-2"><span id="page-current">1</span> / <span id="page-total">--</span></span>
+    <span class="mx-2 d-flex align-items-center gap-2">
+      <input type="number" id="page-input" class="form-control form-control-sm text-center p-1" value="1" min="1" style="width: 60px;">
+      <span>/</span>
+      <span id="page-total">--</span>
+    </span>
     <button class="btn btn-sm btn-light rounded-circle" onclick="nextPage()">❯</button>
+    <button class="btn btn-sm btn-outline-light ms-3" onclick="toggleDisplay()">📖 View</button>
   </div>
 
   <!-- Scripts: jQuery & Turn.js -->

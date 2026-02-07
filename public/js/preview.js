@@ -55,7 +55,7 @@ async function loadBook(id) {
       elevation: 50,
       when: {
         turned: function (e, page) {
-          $("#page-current").text(page);
+          $("#page-input").val(page);
         },
       },
     });
@@ -64,6 +64,14 @@ async function loadBook(id) {
     $(document).keydown(function (e) {
       if (e.keyCode == 37) flipbook.turn("previous");
       if (e.keyCode == 39) flipbook.turn("next");
+    });
+
+    // รองรับการพิมพ์เลขหน้าเพื่อข้าม
+    $("#page-input").change(function () {
+      const page = parseInt($(this).val());
+      if (page >= 1 && page <= book.pages.length) {
+        flipbook.turn("page", page);
+      }
     });
 
     // ปรับขนาดเมื่อย่อ/ขยายจอ
@@ -84,13 +92,31 @@ function nextPage() {
   $("#flipbook").turn("next");
 }
 
+function toggleDisplay() {
+  const current = $("#flipbook").turn("display");
+  const newDisplay = current === "double" ? "single" : "double";
+  $("#flipbook").turn("display", newDisplay);
+  resizeFlipbook();
+}
+
 function resizeFlipbook() {
+  // ตรวจสอบว่า turn.js ทำงานหรือยัง
+  if (!$("#flipbook").data().turn) return;
+
   const width = $(window).width();
   const height = $(window).height();
+  const display = $("#flipbook").turn("display");
   
-  // ปรับขนาดให้พอดีจอ (Responsive)
-  let newWidth = width > 1000 ? 900 : width - 40;
-  let newHeight = (newWidth * 600) / 900; // รักษาสัดส่วน
+  // กำหนดสัดส่วน: หน้าคู่ (1.5) หรือ หน้าเดี่ยว (0.75)
+  const aspectRatio = display === "double" ? 1.5 : 0.75;
 
+  let newWidth = width - 40;
+  let newHeight = newWidth / aspectRatio;
+
+  if (newHeight > height - 100) {
+    newHeight = height - 100;
+    newWidth = newHeight * aspectRatio;
+  }
+  
   $("#flipbook").turn("size", newWidth, newHeight);
 }
