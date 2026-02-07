@@ -4,6 +4,7 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const connectDB = require("./config/db");
 const auth = require("./middleware/auth");
@@ -15,6 +16,13 @@ const app = express();
 
 /* CONNECT DB */
 connectDB();
+
+mongoose.connection.once("open", async () => {
+  try {
+    await mongoose.connection.collection("books").dropIndex("bookCode_1");
+    console.log("✅ Dropped old index: bookCode_1");
+  } catch (err) { /* Index not found or already dropped */ }
+});
 
 /* CORS */
 app.use(

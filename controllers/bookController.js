@@ -32,6 +32,7 @@ exports.createBook = async (req, res) => {
     // ✅ 1) TITLE ต้องไม่ซ้ำ
     // ===============================
     const normalized = normalizeTitle(title);
+    const folderName = normalized; // ใช้ชื่อที่ normalize แล้วเป็นชื่อโฟลเดอร์
 
     const titleExists = await Book.findOne({
       titleNormalized: normalized,
@@ -82,7 +83,7 @@ exports.createBook = async (req, res) => {
 
       coverUploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({ folder: "books/covers" }, (err, result) => {
+          .upload_stream({ folder: `books/${folderName}` }, (err, result) => {
             if (err) reject(err);
             else resolve(result);
           })
@@ -96,7 +97,7 @@ exports.createBook = async (req, res) => {
     const pdfUploadResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { folder: "books/pdf", resource_type: "raw" },
+          { folder: `books/${folderName}`, resource_type: "auto" },
           (err, result) => {
             if (err) reject(err);
             else resolve(result);
@@ -106,27 +107,34 @@ exports.createBook = async (req, res) => {
     });
 
     // ===============================
-    // ✅ Generate bookCode
+    // ✅ Generate Pages (PDF -> JPG)
     // ===============================
-    const lastBook = await Book.findOne()
-      .sort({ createdAt: -1 })
-      .select("bookCode");
+    const pages = [];
+    const totalPages = pdfUploadResult.pages || 0; // Cloudinary คืนค่าจำนวนหน้ามาให้
 
-    let nextNumber = 1;
-    if (lastBook?.bookCode) {
-      nextNumber = parseInt(lastBook.bookCode.split("-")[1]) + 1;
+    for (let i = 1; i <= totalPages; i++) {
+      // สร้าง URL สำหรับดึงรูปภาพหน้า i จากไฟล์ PDF
+      const pageUrl = cloudinary.url(pdfUploadResult.public_id, {
+        page: i,
+        format: "jpg",
+        secure: true,
+      });
+
+      pages.push({
+        pageNumber: i,
+        imageUrl: pageUrl,
+        public_id: pdfUploadResult.public_id, // ใช้ public_id ของ PDF อ้างอิง
+      });
     }
-
-    const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
 
     // ===============================
     // ✅ Save Book
     // ===============================
     const book = await Book.create({
       title,
-      titleNormalized: normalized, 
+      titleNormalized: normalized,
+      folder: folderName,
       detail,
-      bookCode,
       pdfHash,
       pdfFile: {
         url: pdfUploadResult.secure_url,
@@ -141,6 +149,9 @@ exports.createBook = async (req, res) => {
           }
         : undefined,
 
+      pages,
+      totalPages,
+      status: "ready", // เปลี่ยนสถานะเป็นพร้อมใช้งานทันที
       addedBy: req.session.user.id,
     });
 

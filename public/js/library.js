@@ -37,6 +37,10 @@ async function loadBooks() {
              <small class="text-muted">Used: <span class="fw-bold text-success">${book.usedCodes}</span></small>
           </div>
 
+          <a href="/preview.html?id=${book._id}" class="btn btn-primary btn-sm w-100 mb-2">
+            📖 อ่านหนังสือ (Preview)
+          </a>
+
           ${
             book.isOwner
               ? `<div class="d-flex gap-2 mt-3 pt-3 border-top">
