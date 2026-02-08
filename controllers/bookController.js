@@ -328,6 +328,27 @@ exports.deleteBook = async (req, res) => {
         .json({ message: "Unauthorized to delete this book" });
     }
 
+    // ✅ 1. ลบไฟล์รูปปกและ PDF จาก Cloudinary
+    if (book.coverImage?.public_id) {
+      await cloudinary.uploader.destroy(book.coverImage.public_id);
+    }
+
+    if (book.pdfFile?.public_id) {
+      await cloudinary.uploader.destroy(book.pdfFile.public_id);
+    }
+
+    // ✅ 2. ลบ QR Code และ Barcode ของ BookCode ที่เกี่ยวข้องออกจาก Cloudinary
+    const codes = await BookCode.find({ bookId: book._id });
+    for (const code of codes) {
+      if (code.qrImage?.public_id) {
+        await cloudinary.uploader.destroy(code.qrImage.public_id);
+      }
+      if (code.barcodeImage?.public_id) {
+        await cloudinary.uploader.destroy(code.barcodeImage.public_id);
+      }
+    }
+    await BookCode.deleteMany({ bookId: book._id });
+
     await book.deleteOne();
     res.json({ message: "Book deleted successfully" });
   } catch (err) {
