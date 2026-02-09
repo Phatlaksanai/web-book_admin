@@ -233,6 +233,14 @@ exports.getBooks = async (req, res) => {
 ========================= */
 exports.getBookById = async (req, res) => {
   try {
+    // ✅ FIX: แก้ปัญหา Route conflict (กรณี /codes หรือ /dashboard วิ่งเข้า /:id)
+    if (req.params.id === "codes") {
+      return exports.getBookCodes(req, res);
+    }
+    if (req.params.id === "dashboard") {
+      return exports.getDashboardData(req, res);
+    }
+
     const book = await Book.findById(req.params.id);
 
     if (!book) {
@@ -241,6 +249,9 @@ exports.getBookById = async (req, res) => {
 
     res.json(book);
   } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({ message: "Invalid Book ID" });
+    }
     res.status(500).json({ message: err.message });
   }
 };
@@ -253,57 +264,108 @@ exports.updateBook = async (req, res) => {
     const id = req.params.id;
     const userId = req.session.user?.id;
 
-    if (!req.body.detail || !req.body.detail.trim()) {
-      return res.status(400).json({ message: "Detail is required" });
-    }
-
-    const updateData = {
-      title: req.body.title?.trim(),
-      detail: req.body.detail.trim(),
-    };
-
-    if (req.files?.cover?.length) {
-      updateData.coverImage = {
-        url: req.files.cover[0].path,
-        public_id: req.files.cover[0].filename,
-      };
-    }
-
-    if (req.files?.pdf?.length) {
-      updateData.pdfFile = {
-        url: req.files.pdf[0].path,
-        public_id: req.files.pdf[0].filename,
-      };
-    }
-
     // 🔒 Check ownership before update
-    const existingBook = await Book.findById(id);
-    if (!existingBook) {
+    const book = await Book.findById(id);
+    if (!book) {
       return res.status(404).json({ message: "Book not found" });
     }
-    if (existingBook.addedBy?.toString() !== userId) {
+    if (book.addedBy?.toString() !== userId) {
       return res
         .status(403)
         .json({ message: "Unauthorized to update this book" });
     }
 
-    const book = await Book.findByIdAndUpdate(
+    const { title, detail } = req.body;
+    if (!title?.trim() || !detail?.trim()) {
+      return res.status(400).json({ message: "Title and Detail are required" });
+    }
+
+    const updateData = {
+      title: title.trim(),
+      detail: detail.trim(),
+    };
+
+    const folderName = book.folder;
+
+    // Helper to upload stream to Cloudinary
+    const uploadStream = (buffer, options) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(options, (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }).end(buffer);
+      });
+    };
+
+    // Handle new cover image
+    if (req.files?.cover?.length) {
+      const coverBuffer = req.files.cover[0].buffer;
+      const newCoverHash = crypto.createHash("sha256").update(coverBuffer).digest("hex");
+      const coverExists = await Book.findOne({ coverHash: newCoverHash, _id: { $ne: id } });
+      if (coverExists) {
+        return res.status(400).json({ message: "❌ รูปปกนี้ถูกใช้แล้ว" });
+      }
+
+      const coverUploadResult = await uploadStream(coverBuffer, { folder: `books/${folderName}` });
+      
+      if (book.coverImage?.public_id) {
+        await cloudinary.uploader.destroy(book.coverImage.public_id);
+      }
+
+      updateData.coverImage = {
+        url: coverUploadResult.secure_url,
+        public_id: coverUploadResult.public_id,
+      };
+      updateData.coverHash = newCoverHash;
+    }
+
+    // Handle new PDF file
+    if (req.files?.pdf?.length) {
+      const pdfBuffer = req.files.pdf[0].buffer;
+      const newPdfHash = crypto.createHash("sha256").update(pdfBuffer).digest("hex");
+      const pdfExists = await Book.findOne({ pdfHash: newPdfHash, _id: { $ne: id } });
+      if (pdfExists) {
+        return res.status(400).json({ message: "❌ PDF นี้ถูกอัปโหลดแล้ว" });
+      }
+
+      const pdfUploadResult = await uploadStream(pdfBuffer, { folder: `books/${folderName}`, resource_type: "auto" });
+
+      if (book.pdfFile?.public_id) {
+        await cloudinary.uploader.destroy(book.pdfFile.public_id, { invalidate: true });
+      }
+
+      const pages = [];
+      const totalPages = pdfUploadResult.pages || 0;
+      for (let i = 1; i <= totalPages; i++) {
+        const pageUrl = cloudinary.url(pdfUploadResult.public_id, { page: i, format: "jpg", secure: true });
+        pages.push({
+          pageNumber: i,
+          imageUrl: pageUrl,
+          public_id: pdfUploadResult.public_id,
+        });
+      }
+      
+      updateData.pdfFile = { url: pdfUploadResult.secure_url, public_id: pdfUploadResult.public_id };
+      updateData.pdfHash = newPdfHash;
+      updateData.pages = pages;
+      updateData.totalPages = totalPages;
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(
       id,
       { $set: updateData },
       { new: true, runValidators: true },
     );
 
-    if (!book) {
-      return res.status(404).json({ message: "Book not found" });
+    // 🔁 sync title in BookCode
+    if (updateData.title && updateData.title !== book.title) {
+        await BookCode.updateMany(
+          { bookId: id },
+          { $set: { bookTitle: updateData.title } },
+        );
     }
 
-    // 🔁 sync title in BookCode
-    await BookCode.updateMany(
-      { bookId: id },
-      { $set: { bookTitle: updateData.title } },
-    );
-
-    res.json(book);
+    res.json(updatedBook);
   } catch (err) {
     console.error("UPDATE BOOK ERROR:", err);
     res.status(500).json({ message: err.message });

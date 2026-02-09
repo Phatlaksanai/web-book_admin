@@ -1,206 +1,165 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("codeForm");
-  const bookSelect = document.getElementById("bookSelect");
+let allCodes = [];
 
-  /* =====================
-     LOAD BOOKS
-  ===================== */
-  fetch("/api/books")
-    .then(res => res.json())
-    .then(books => {
-      books.forEach(book => {
-        const opt = document.createElement("option");
-        opt.value = book._id;
-        opt.textContent = book.title;
-        bookSelect.appendChild(opt);
-      });
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    loadBooksForSelection();
+    loadExistingCodes();
 
-  loadCodes();
+    const codeForm = document.getElementById('codeForm');
+    codeForm.addEventListener('submit', handleCreateCode);
 
-  /* =====================
-     CREATE BOOK CODE
-  ===================== */
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (!bookSelect.value) {
-      alert("กรุณาเลือกหนังสือ");
-      return;
-    }
-
-    const res = await fetch("/api/books/createcode", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        bookId: bookSelect.value,
-        bookTitle: bookSelect.options[bookSelect.selectedIndex].text,
-      }),
-    });
-
-    if (res.ok) {
-      form.reset();
-      loadCodes();
-      alert("สร้างรหัสสำเร็จ");
-    } else {
-      alert("สร้างรหัสไม่สำเร็จ");
-    }
-  });
+    const searchInput = document.getElementById('codeSearchInput');
+    searchInput?.addEventListener('input', handleCodeSearch);
 });
 
-/* =====================
-   QR CODE
-===================== */
-async function createQR(codeId) {
-  if (!confirm("สร้าง QR Code ?")) return;
+async function loadBooksForSelection() {
+    try {
+        const res = await fetch('/api/books');
+        if (!res.ok) throw new Error('Failed to load books');
+        const books = await res.json();
 
-  const res = await fetch(`/api/books/bookcodes/${codeId}/qrcode`, {
-    method: "POST",
-  });
+        const datalist = document.getElementById('bookOptions');
+        datalist.innerHTML = ''; // Clear existing options
 
-  if (!res.ok) {
-    alert("สร้าง QR ไม่สำเร็จ");
-    return;
-  }
-
-  const updatedCode = await res.json();
-  document.getElementById(`code-${codeId}`).innerHTML = renderRow(updatedCode);
+        books.forEach(book => {
+            const option = document.createElement('option');
+            option.value = book.title;
+            option.dataset.id = book._id; // Store ID in data attribute
+            datalist.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading books:', error);
+    }
 }
 
-/* =====================
-   BARCODE
-===================== */
-async function createBarcode(codeId) {
-  if (!confirm("สร้าง Barcode ?")) return;
-
-  const res = await fetch(`/api/books/bookcodes/${codeId}/barcode`, {
-    method: "POST",
-  });
-
-  if (!res.ok) {
-    alert("สร้าง Barcode ไม่สำเร็จ");
-    return;
-  }
-
-  const updatedCode = await res.json();
-  document.getElementById(`code-${codeId}`).innerHTML = renderRow(updatedCode);
+async function loadExistingCodes() {
+    try {
+        const res = await fetch('/api/books/codes');
+        if (!res.ok) {
+            let errorMsg = `Status: ${res.status}`;
+            try {
+                const errorData = await res.json();
+                errorMsg = errorData.message || errorMsg;
+            } catch (e) {
+                errorMsg = `${res.status} - ${res.statusText}`;
+            }
+            throw new Error(errorMsg);
+        }
+        allCodes = await res.json();
+        renderCodes(allCodes);
+    } catch (error) {
+        console.error('Error loading codes:', error);
+        const tableBody = document.getElementById('codeTable');
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</td></tr>`;
+        }
+    }
 }
 
-/* =====================
-   MODAL VIEW
-===================== */
-function showQR(code) {
-  document.getElementById("qrBox").innerHTML = "";
-  document.getElementById("barcode").innerHTML = "";
+function renderCodes(codes) {
+    const tableBody = document.getElementById('codeTable');
+    tableBody.innerHTML = '';
 
-  new QRCode(document.getElementById("qrBox"), {
-    text: code,
-    width: 200,
-    height: 200,
-  });
-
-  new bootstrap.Modal(document.getElementById("codeModal")).show();
-}
-
-function showBarcode(code) {
-  document.getElementById("qrBox").innerHTML = "";
-  document.getElementById("barcode").innerHTML = "";
-
-  JsBarcode("#barcode", code, {
-    format: "CODE128",
-    width: 2,
-    height: 80,
-    displayValue: true,
-  });
-
-  new bootstrap.Modal(document.getElementById("codeModal")).show();
-}
-
-/* =====================
-   TABLE
-===================== */
-function renderRow(c) {
-  return `
-    <td>${c.code}</td>
-    <td>${c.bookTitle}</td>
-    <td>${c.used ? "ใช้แล้ว" : "ยังไม่ใช้"}</td>
-    <td>${new Date(c.createdAt).toLocaleString()}</td>
-
-    <!-- 🔧 COLUMN เครื่องมือ -->
-    <td class="text-nowrap">
-
-      ${
-        c.qrImage?.url
-          ? `<a href="${c.qrImage.url}" target="_blank"
-               class="btn btn-success btn-sm me-1">ดู QR</a>`
-          : `<button class="btn btn-primary btn-sm me-1"
-               onclick="createQR('${c._id}')">สร้าง QR</button>`
-      }
-
-      ${
-        c.barcodeImage?.url
-          ? `<a href="${c.barcodeImage.url}" target="_blank"
-               class="btn btn-info btn-sm me-1">ดู Barcode</a>`
-          : `<button class="btn btn-warning btn-sm me-1"
-               onclick="createBarcode('${c._id}')">สร้าง Barcode</button>`
-      }
-
-      <!-- ❌ ปุ่มลบ (อยู่ column เดียวกัน) -->
-      <button class="btn btn-danger btn-sm"
-        onclick="deleteCode('${c._id}')">
-        ลบ
-      </button>
-
-    </td>
-  `;
-}
-
-/* =====================
-   LOAD CODES
-===================== */
-
-function loadCodes() {
-  fetch("/api/books/bookcodes")
-    .then(res => res.json())
-    .then(codes => {
-      const table = document.getElementById("codeTable");
-      table.innerHTML = "";
-
-      if (!codes.length) {
-        table.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center">ยังไม่มีรหัส</td>
-          </tr>`;
+    if (codes.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">ไม่พบรหัสที่ตรงกัน</td></tr>';
         return;
-      }
+    }
 
-      codes.forEach(c => {
-        const tr = document.createElement("tr");
-        tr.id = `code-${c._id}`;
-        tr.innerHTML = renderRow(c);
-        table.appendChild(tr);
-      });
+    codes.forEach(code => {
+        const row = `
+            <tr>
+                <td><code class="fw-bold fs-6">${code.code}</code></td>
+                <td class="text-start">${code.bookTitle}</td>
+                <td>
+                    ${code.used 
+                        ? '<span class="badge bg-success">ใช้แล้ว</span>' 
+                        : '<span class="badge bg-secondary">ยังไม่ใช้</span>'}
+                </td>
+                <td>${new Date(code.createdAt).toLocaleDateString()}</td>
+                <td class="d-flex gap-2 justify-content-center">
+                    <button class="btn btn-sm btn-outline-dark" title="Download QR Code" onclick="downloadImage('${code.qrImage?.url}', 'qr_${code.code}.png')" ${!code.qrImage?.url ? 'disabled' : ''}>QR</button>
+                    <button class="btn btn-sm btn-outline-dark" title="Download Barcode" onclick="downloadImage('${code.barcodeImage?.url}', 'barcode_${code.code}.png')" ${!code.barcodeImage?.url ? 'disabled' : ''}>Barcode</button>
+                    <button class="btn btn-sm btn-outline-danger" title="Delete Code" onclick="deleteBookCode('${code._id}')">🗑️</button>
+                </td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML('beforeend', row);
     });
 }
 
-/* =====================
-   DELETE CODE
-===================== */
-async function deleteCode(codeId) {
-  if (!confirm("ต้องการลบรหัสนี้ใช่หรือไม่?")) return;
-
-  const res = await fetch(`/api/books/bookcodes/${codeId}`, {
-    method: "DELETE",
-  });
-
-  if (!res.ok) {
-    alert("ลบไม่สำเร็จ");
-    return;
-  }
-
-  const row = document.getElementById(`code-${codeId}`);
-  if (row) row.remove();
-
-  alert("ลบข้อมูลเรียบร้อย");
+function handleCodeSearch(event) {
+    const keyword = event.target.value.toLowerCase();
+    const filtered = allCodes.filter(c => 
+        c.code.toLowerCase().includes(keyword) || 
+        c.bookTitle.toLowerCase().includes(keyword));
+    renderCodes(filtered);
 }
 
+async function handleCreateCode(event) {
+    event.preventDefault();
+    const bookInput = document.getElementById('bookInput');
+    const selectedTitle = bookInput.value;
+
+    // Find the selected book's ID from the datalist
+    const options = document.querySelectorAll('#bookOptions option');
+    let bookId = null;
+    for (const option of options) {
+        if (option.value === selectedTitle) {
+            bookId = option.dataset.id;
+            break;
+        }
+    }
+
+    if (!bookId) {
+        alert('กรุณาเลือกหนังสือที่มีอยู่ในรายการ');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/books/code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookId })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+            alert(result.message || 'สร้างรหัสสำเร็จ');
+            bookInput.value = ''; // Clear input
+            loadExistingCodes(); // Refresh table
+        } else {
+            throw new Error(result.message || 'สร้างรหัสไม่สำเร็จ');
+        }
+    } catch (error) {
+        console.error('Error creating code:', error);
+        alert(error.message);
+    }
+}
+
+window.deleteBookCode = async function(codeId) {
+    if (!confirm('คุณต้องการลบรหัสนี้ใช่หรือไม่?')) return;
+
+    try {
+        const res = await fetch(`/api/books/code/${codeId}`, { method: 'DELETE' });
+        if (res.ok) {
+            alert('ลบรหัสสำเร็จ');
+            loadExistingCodes();
+        } else {
+            const result = await res.json();
+            throw new Error(result.message || 'ลบไม่สำเร็จ');
+        }
+    } catch (error) {
+        console.error('Error deleting code:', error);
+        alert(error.message);
+    }
+}
+
+window.downloadImage = async function(imageUrl, filename) {
+    if (!imageUrl) return alert('ไม่พบรูปภาพสำหรับดาวน์โหลด');
+    const a = document.createElement('a');
+    a.href = imageUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
