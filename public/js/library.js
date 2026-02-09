@@ -1,12 +1,27 @@
+let allBooks = [];
+
 async function loadBooks() {
   const res = await fetch("/api/books");
-  const books = await res.json();
+  allBooks = await res.json();
+  renderBooks(allBooks);
+}
 
+document.getElementById("searchInput")?.addEventListener("input", (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const filtered = allBooks.filter(
+    (b) =>
+      b.title.toLowerCase().includes(keyword) ||
+      (b.detail && b.detail.toLowerCase().includes(keyword))
+  );
+  renderBooks(filtered);
+});
+
+function renderBooks(books) {
   const container = document.getElementById("book-list");
   container.innerHTML = "";
 
   if (books.length === 0) {
-    container.innerHTML = `<div class="col-12 text-center py-5 text-muted">ไม่พบหนังสือในระบบ</div>`;
+    container.innerHTML = `<div class="col-12 text-center py-5 text-muted">ไม่พบหนังสือ</div>`;
     return;
   }
 
