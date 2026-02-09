@@ -376,22 +376,58 @@ exports.getBookCodes = async (req, res) => {
 ========================= */
 exports.createBookCode = async (req, res) => {
   try {
-    const { bookId, bookTitle } = req.body;
+    const { bookId } = req.body;
 
-    if (!bookId || !bookTitle) {
-      return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
+    if (!bookId) {
+      return res.status(400).json({ message: "Book ID is required" });
+    }
+
+    // 1. ดึงข้อมูลหนังสือเพื่อเอาชื่อโฟลเดอร์
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
     }
 
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const folderName = book.folder || normalizeTitle(book.title);
+
+    // 2. สร้าง QR Code และ Barcode
+    const qrBuffer = await QRCode.toBuffer(code, { width: 300, margin: 2 });
+    
+    const barcodeBuffer = await bwipjs.toBuffer({
+      bcid: "code128",
+      text: code,
+      scale: 3,
+      height: 10,
+      includetext: true,
+      textxalign: "center",
+    });
+
+    // 3. อัปโหลดขึ้น Cloudinary (เก็บในโฟลเดอร์เดียวกับหนังสือ)
+    const uploadToCloudinary = (buffer, publicId) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: `books/${folderName}`, public_id: publicId, overwrite: true },
+          (error, result) => (error ? reject(error) : resolve(result))
+        ).end(buffer);
+      });
+    };
+
+    const [qrUpload, barcodeUpload] = await Promise.all([
+      uploadToCloudinary(qrBuffer, `qr_${code}`),
+      uploadToCloudinary(barcodeBuffer, `barcode_${code}`)
+    ]);
 
     await BookCode.create({
       code,
       bookId,
-      bookTitle,
+      bookTitle: book.title,
       used: false,
+      qrImage: { url: qrUpload.secure_url, public_id: qrUpload.public_id },
+      barcodeImage: { url: barcodeUpload.secure_url, public_id: barcodeUpload.public_id }
     });
 
-    res.json({ message: "สร้างรหัสสำเร็จ" });
+    res.json({ message: "สร้างรหัสและรูปภาพสำเร็จ" });
   } catch (err) {
     console.error("CREATE CODE ERROR:", err);
     res.status(500).json({ message: "Create code failed" });
@@ -410,6 +446,9 @@ exports.generateQRCode = async (req, res) => {
       return res.status(404).json({ message: "Code not found" });
     }
 
+    const book = await Book.findById(bookCode.bookId);
+    const folderName = book ? (book.folder || normalizeTitle(book.title)) : "book-qrcode";
+
     const qrBuffer = await QRCode.toBuffer(bookCode.code, {
       width: 300,
       margin: 2,
@@ -417,7 +456,7 @@ exports.generateQRCode = async (req, res) => {
 
     const uploadResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ folder: "book-qrcode" }, (error, result) => {
+        .upload_stream({ folder: `books/${folderName}`, public_id: `qr_${bookCode.code}` }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
         })
@@ -456,6 +495,9 @@ exports.generateBarcode = async (req, res) => {
       return res.json(bookCode);
     }
 
+    const book = await Book.findById(bookCode.bookId);
+    const folderName = book ? (book.folder || normalizeTitle(book.title)) : "book-barcode";
+
     // 1️⃣ สร้าง barcode buffer
     const png = await bwipjs.toBuffer({
       bcid: "code128",
@@ -469,7 +511,7 @@ exports.generateBarcode = async (req, res) => {
     // 2️⃣ upload cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ folder: "book-barcode" }, (error, result) => {
+        .upload_stream({ folder: `books/${folderName}`, public_id: `barcode_${bookCode.code}` }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
         })
