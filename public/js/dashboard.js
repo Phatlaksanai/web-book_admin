@@ -8,11 +8,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!res.ok) throw new Error("Failed to fetch dashboard data");
     
     dashboardData = await res.json();
-    const { totalBooks, myBooks, history } = dashboardData;
+    const { totalBooks, myBooks, totalCodes, usedCodes, history, bookStats } = dashboardData;
 
     // 2. Update Stats Cards
-    document.getElementById("totalBooks").innerText = totalBooks;
-    document.getElementById("myBooks").innerText = myBooks;
+    if(document.getElementById("totalBooks")) document.getElementById("totalBooks").innerText = totalBooks;
+    if(document.getElementById("myBooks")) document.getElementById("myBooks").innerText = myBooks;
+    if(document.getElementById("totalCodes")) document.getElementById("totalCodes").innerText = totalCodes;
+    if(document.getElementById("usedCodes")) document.getElementById("usedCodes").innerText = usedCodes;
 
     // 3. Render Chart
     renderChart("books");
@@ -27,6 +29,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 4. Render History List
     renderHistory(history);
+
+    // 5. Render Interest Chart (Scatter Plot)
+    renderInterestChart(bookStats);
+
+    // 6. Populate book selector for single book analysis
+    populateBookSelector(bookStats);
 
   } catch (err) {
     console.error("Dashboard Error:", err);
@@ -116,4 +124,112 @@ function renderHistory(history) {
     `;
     list.appendChild(li);
   });
+}
+
+function renderInterestChart(bookStats) {
+  const ctx = document.getElementById("interestChart");
+  if (!ctx || !bookStats) return;
+
+  const dataPoints = bookStats.map(book => ({
+    x: book.totalCodes,
+    y: book.usedCodes,
+    title: book.title
+  }));
+
+  new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'หนังสือ',
+        data: dataPoints,
+        backgroundColor: 'rgba(78, 115, 223, 0.6)',
+        borderColor: 'rgba(78, 115, 223, 1)',
+        borderWidth: 1,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const point = context.raw;
+              return `${point.title}: สร้าง ${point.x} / ใช้ ${point.y}`;
+            }
+          }
+        },
+        legend: { display: false }
+      },
+      scales: {
+        x: { title: { display: true, text: 'รหัสทั้งหมด (Total Codes)' }, beginAtZero: true, ticks: { precision: 0 } },
+        y: { title: { display: true, text: 'รหัสที่ถูกใช้ (Used Codes)' }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+}
+
+function populateBookSelector(bookStats) {
+    const selector = document.getElementById('bookSelector');
+    if (!selector || !bookStats) return;
+
+    bookStats.sort((a, b) => a.title.localeCompare(b.title)).forEach(book => {
+        const option = document.createElement('option');
+        option.value = book.title;
+        option.textContent = book.title;
+        selector.appendChild(option);
+    });
+
+    selector.addEventListener('change', (e) => {
+        displaySingleBookAnalysis(e.target.value);
+    });
+}
+
+function displaySingleBookAnalysis(title) {
+    const resultDiv = document.getElementById('singleBookAnalysisResult');
+    if (!resultDiv) return;
+
+    if (!title) {
+        resultDiv.innerHTML = '<p>เลือกหนังสือเพื่อดูข้อมูล</p>';
+        resultDiv.className = 'text-center text-muted d-flex align-items-center justify-content-center p-3';
+        return;
+    }
+
+    const bookData = dashboardData.bookStats.find(b => b.title === title);
+
+    if (!bookData) {
+        resultDiv.innerHTML = '<p class="text-danger">ไม่พบข้อมูลสำหรับหนังสือเล่มนี้</p>';
+        return;
+    }
+
+    const used = bookData.usedCodes;
+    const total = bookData.totalCodes;
+    const available = total - used;
+    const percentage = total > 0 ? ((used / total) * 100).toFixed(1) : 0;
+
+    resultDiv.className = 'text-start p-3';
+    resultDiv.innerHTML = `
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <h5 class="fw-bold">สถิติรหัส (Code Stats)</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><strong>สร้างทั้งหมด (Total):</strong> <span class="badge bg-primary rounded-pill fs-6">${total}</span></li>
+                    <li><strong>ใช้ไปแล้ว (Used):</strong> <span class="badge bg-success rounded-pill fs-6">${used}</span></li>
+                    <li><strong>คงเหลือ (Available):</strong> <span class="badge bg-warning text-dark rounded-pill fs-6">${available}</span></li>
+                </ul>
+            </div>
+            <div class="col-md-7">
+                <h5 class="fw-bold">อัตราการใช้งาน (Usage Rate)</h5>
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: ${percentage}%;" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100">
+                        ${percentage}%
+                    </div>
+                </div>
+                <small class="text-muted mt-1 d-block">
+                    รหัสถูกใช้ไป ${used} จากทั้งหมด ${total} รหัส
+                </small>
+            </div>
+        </div>
+    `;
 }

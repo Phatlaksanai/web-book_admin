@@ -28,7 +28,7 @@
 
       <!-- Stats Cards -->
       <div class="row g-4 mb-4">
-        <div class="col-md-6">
+        <div class="col-xl-3 col-md-6">
           <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
             <div class="card-body">
               <div class="row align-items-center">
@@ -46,7 +46,7 @@
           </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-xl-3 col-md-6">
           <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
             <div class="card-body">
               <div class="row align-items-center">
@@ -58,6 +58,42 @@
                 </div>
                 <div class="col-auto">
                   <h2 class="text-gray-300">👤</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="card border-0 shadow-sm h-100 border-start border-4 border-info">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                    รหัสทั้งหมด (Total Codes)
+                  </div>
+                  <div class="h3 mb-0 fw-bold text-gray-800" id="totalCodes">...</div>
+                </div>
+                <div class="col-auto">
+                  <h2 class="text-gray-300">🎟️</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="card border-0 shadow-sm h-100 border-start border-4 border-warning">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                    รหัสที่ใช้แล้ว (Used)
+                  </div>
+                  <div class="h3 mb-0 fw-bold text-gray-800" id="usedCodes">...</div>
+                </div>
+                <div class="col-auto">
+                  <h2 class="text-gray-300">✔️</h2>
                 </div>
               </div>
             </div>
@@ -98,6 +134,45 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Interest Analysis Chart (Scatter Plot) -->
+      <div class="row mb-4 mt-4">
+        <div class="col-12">
+          <div class="card shadow-sm border-0">
+            <div class="card-header py-3 bg-white">
+              <h6 class="m-0 fw-bold text-primary">📈 วิเคราะห์ความสนใจ (Interest Analysis)</h6>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                <canvas id="interestChart"></canvas>
+              </div>
+              <small class="text-muted mt-2 d-block text-center">แกน X: จำนวนรหัสทั้งหมด (Supply) | แกน Y: จำนวนที่ถูกใช้ (Demand)</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single Book Analysis -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm border-0">
+            <div class="card-header py-3 bg-white">
+              <h6 class="m-0 fw-bold text-primary">🔍 วิเคราะห์รายหนังสือ (Single Book Analysis)</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" style="max-width: 500px;">
+                    <label for="bookSelector" class="form-label">เลือกหนังสือ:</label>
+                    <select id="bookSelector" class="form-select">
+                        <option selected value="">-- กรุณาเลือกหนังสือ --</option>
+                    </select>
+                </div>
+                <div id="singleBookAnalysisResult" style="min-height: 100px;" class="text-center text-muted d-flex align-items-center justify-content-center p-3">
+                    <p>เลือกหนังสือเพื่อดูข้อมูล</p>
+                </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

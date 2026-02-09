@@ -618,12 +618,40 @@ exports.getDashboardData = async (req, res) => {
       .limit(5)
       .select("title createdAt");
 
+    // ✅ เพิ่ม: ดึงข้อมูลสถิติรายหนังสือสำหรับ Scatter Plot
+    const bookStats = await Book.aggregate([
+      {
+        $lookup: {
+          from: "bookcodes",
+          localField: "_id",
+          foreignField: "bookId",
+          as: "codes",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          totalCodes: { $size: "$codes" },
+          usedCodes: {
+            $size: {
+              $filter: {
+                input: "$codes",
+                as: "code",
+                cond: { $eq: ["$$code.used", true] },
+              },
+            },
+          },
+        },
+      },
+    ]);
+
     res.json({
       totalBooks,
       myBooks,
       totalCodes,
       usedCodes,
       history,
+      bookStats,
     });
   } catch (err) {
     console.error("DASHBOARD ERROR:", err);
