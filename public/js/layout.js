@@ -7,6 +7,11 @@ fetch("/components/navbar.html")
     if (logoutBtn) {
       logoutBtn.addEventListener("click", logout);
     }
+    
+    // ✅ Re-apply settings (Theme, Font, Music) after navbar is loaded
+    if (typeof applySettings === 'function') {
+      applySettings();
+    }
   });
 
 async function logout(e) {
