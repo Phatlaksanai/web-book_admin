@@ -26,6 +26,13 @@
       <!-- Search -->
       <div class="mb-4">
         <input type="text" id="searchInput" class="form-control" placeholder="🔍 ค้นหาชื่อหนังสือ หรือ รายละเอียด...">
+        <div class="mt-2 d-flex gap-2 align-items-center flex-wrap">
+          <span class="text-muted small">Tags:</span>
+          <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="setSearch('Manga')">Manga</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="setSearch('Novel')">Novel</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="setSearch('Sci-Fi')">Sci-Fi</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="setSearch('Fantasy')">Fantasy</button>
+        </div>
       </div>
 
       <!-- Book Grid -->

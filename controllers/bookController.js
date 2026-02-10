@@ -23,10 +23,17 @@ exports.createBook = async (req, res) => {
 
     const title = req.body.title?.trim();
     const detail = req.body.detail?.trim();
+    const tags = req.body.tags;
 
     if (!title) return res.status(400).json({ message: "Title is required" });
 
     if (!detail) return res.status(400).json({ message: "Detail is required" });
+
+    // Parse tags from comma-separated string to array
+    let tagsArray = [];
+    if (tags && typeof tags === 'string') {
+      tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    }
 
     // ===============================
     // ✅ 1) TITLE ต้องไม่ซ้ำ
@@ -135,6 +142,7 @@ exports.createBook = async (req, res) => {
       titleNormalized: normalized,
       folder: folderName,
       detail,
+      tags: tagsArray,
       pdfHash,
       pdfFile: {
         url: pdfUploadResult.secure_url,
@@ -275,7 +283,7 @@ exports.updateBook = async (req, res) => {
         .json({ message: "Unauthorized to update this book" });
     }
 
-    const { title, detail } = req.body;
+    const { title, detail, tags } = req.body;
     if (!title?.trim() || !detail?.trim()) {
       return res.status(400).json({ message: "Title and Detail are required" });
     }
@@ -284,6 +292,12 @@ exports.updateBook = async (req, res) => {
       title: title.trim(),
       detail: detail.trim(),
     };
+
+    if (tags !== undefined) {
+      updateData.tags = typeof tags === 'string'
+        ? tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        : [];
+    }
 
     const folderName = book.folder;
 

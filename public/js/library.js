@@ -11,7 +11,8 @@ document.getElementById("searchInput")?.addEventListener("input", (e) => {
   const filtered = allBooks.filter(
     (b) =>
       b.title.toLowerCase().includes(keyword) ||
-      (b.detail && b.detail.toLowerCase().includes(keyword))
+      (b.detail && b.detail.toLowerCase().includes(keyword)) ||
+      (b.tags && b.tags.some(tag => tag.toLowerCase().includes(keyword)))
   );
   renderBooks(filtered);
 });
@@ -46,6 +47,13 @@ function renderBooks(books) {
              style="display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">
             ${book.detail || "-"}
           </p>
+
+          <div class="mb-2" style="min-height: 28px;">
+            ${book.tags && book.tags.length > 0
+              ? book.tags.slice(0, 3).map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')
+              : ''
+            }
+          </div>
 
           <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded border">
              <small class="text-muted">Codes: <span class="fw-bold text-dark">${book.totalCodes}</span></small>
@@ -92,5 +100,13 @@ async function deleteBook(id) {
 
   document.getElementById(`book-${id}`)?.remove();
 }
+
+window.setSearch = function(keyword) {
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.value = keyword;
+    searchInput.dispatchEvent(new Event("input"));
+  }
+};
 
 loadBooks();

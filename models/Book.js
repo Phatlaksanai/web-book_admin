@@ -48,6 +48,12 @@ const bookSchema = new mongoose.Schema(
       trim: true,
     },
 
+    tags: {
+      type: [String],
+      default: [],
+      index: true,
+    },
+
     // ===== ปกหนังสือ =====
     coverImage: {
       url: {
