@@ -23,7 +23,8 @@ async function logout(e) {
     credentials: "include"
   });
 
-  window.location.href = "/login.html";
+  localStorage.removeItem('token'); // ✅ ลบ Token เพื่อไม่ให้เด้งกลับเข้า Dashboard
+  window.location.href = "/index.html"; // ✅ กลับไปหน้า Welcome
 }
 fetch("/components/footer.html")
   .then(res => res.text())

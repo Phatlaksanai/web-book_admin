@@ -34,6 +34,10 @@
       ยังไม่มีบัญชี?
       <a href="register.html">Register</a>
     </div> -->
+    
+    <div class="mt-3 text-center">
+      <a href="index.html" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem;">← กลับหน้าหลัก (Back to Home)</a>
+    </div>
   </div>
 </div>
 
@@ -103,7 +107,7 @@ async function login() {
 
   if (res.ok) {
     localStorage.setItem('token', data.token); // ✅ สำคัญ
-    window.location.href = 'index.html';       // ✅ ไป dashboard
+    window.location.href = 'dashboard.html';   // ✅ ไป dashboard
   } else {
     document.getElementById('result').innerText =
       data.message || 'Login failed';

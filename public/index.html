@@ -3,193 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin | Dashboard</title>
-
+  <title>Welcome | Star Up</title>
+  
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/y2k.css" id="theme-link" />
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #vanta-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .welcome-container {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .welcome-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 3rem;
+      border-radius: 24px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      animation: fadeIn 1s ease-out;
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #fff, #a5c9ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-desc {
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .btn-custom {
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #6aa9ff 0%, #4389f0 100%);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 15px rgba(67, 137, 240, 0.4);
+    }
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(67, 137, 240, 0.6);
+      color: white;
+    }
+
+    .btn-outline-custom {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+    }
+    .btn-outline-custom:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: white;
+      color: white;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <script>
+    // ถ้ามี token ให้ไป dashboard เลย
+    if (localStorage.getItem('token')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
 </head>
-<body class="bg-light">
+<body>
 
-  <!-- Navbar (Loaded via JS) -->
-  <div id="navbar"></div>
+<!-- Vanta Background -->
+<div id="vanta-bg"></div>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="container mt-5 mb-5" style="max-width: 1000px;">
-      
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark">📊 Dashboard</h2>
-        <a href="/addbook" class="btn btn-primary shadow-sm">
-          + เพิ่มหนังสือใหม่
-        </a>
-      </div>
+<div class="welcome-container">
+  <div class="welcome-card">
+    <h1 class="welcome-title">Star Up Admin</h1>
+    <p class="welcome-desc">
+      ระบบจัดการหนังสือและคลังความรู้อัจฉริยะ<br>
+      Book Management & Library System
+    </p>
+    
+    <div class="d-flex flex-column gap-3">
+      <a href="login.html" class="btn btn-custom btn-primary-custom text-decoration-none">
+        เข้าสู่ระบบ (Login)
+      </a>
+      <a href="register.html" class="btn btn-custom btn-outline-custom text-decoration-none">
+        ลงทะเบียน (Register)
+      </a>
+    </div>
 
-      <!-- Stats Cards -->
-      <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-          <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
-            <div class="card-body">
-              <div class="row align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs fw-bold text-primary text-uppercase mb-1">
-                    หนังสือทั้งหมด (Total)
-                  </div>
-                  <div class="h3 mb-0 fw-bold text-gray-800" id="totalBooks">...</div>
-                </div>
-                <div class="col-auto">
-                  <h2 class="text-gray-300">📚</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-          <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
-            <div class="card-body">
-              <div class="row align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs fw-bold text-success text-uppercase mb-1">
-                    หนังสือของฉัน (My Books)
-                  </div>
-                  <div class="h3 mb-0 fw-bold text-gray-800" id="myBooks">...</div>
-                </div>
-                <div class="col-auto">
-                  <h2 class="text-gray-300">👤</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-          <div class="card border-0 shadow-sm h-100 border-start border-4 border-info">
-            <div class="card-body">
-              <div class="row align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs fw-bold text-info text-uppercase mb-1">
-                    รหัสทั้งหมด (Total Codes)
-                  </div>
-                  <div class="h3 mb-0 fw-bold text-gray-800" id="totalCodes">...</div>
-                </div>
-                <div class="col-auto">
-                  <h2 class="text-gray-300">🎟️</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-          <div class="card border-0 shadow-sm h-100 border-start border-4 border-warning">
-            <div class="card-body">
-              <div class="row align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs fw-bold text-warning text-uppercase mb-1">
-                    รหัสที่ใช้แล้ว (Used)
-                  </div>
-                  <div class="h3 mb-0 fw-bold text-gray-800" id="usedCodes">...</div>
-                </div>
-                <div class="col-auto">
-                  <h2 class="text-gray-300">✔️</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content Row -->
-      <div class="row g-4">
-        
-        <!-- Chart -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm border-0 mb-4 h-100">
-            <div class="card-header py-3 bg-white d-flex flex-row align-items-center justify-content-between">
-              <h6 class="m-0 fw-bold text-primary">สถิติ (Statistics)</h6>
-              <select id="chartType" class="form-select form-select-sm shadow-none" style="width: auto; border-color: #eee;">
-                <option value="books">📚 สัดส่วนหนังสือ</option>
-                <option value="codes">🎟️ การใช้งาน Code</option>
-              </select>
-            </div>
-            <div class="card-body">
-              <div class="chart-container" style="position: relative; height: 250px; width: 100%;">
-                <canvas id="bookChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- History -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm border-0 mb-4 h-100">
-            <div class="card-header py-3 bg-white">
-              <h6 class="m-0 fw-bold text-primary">ประวัติการเพิ่มล่าสุด</h6>
-            </div>
-            <ul class="list-group list-group-flush" id="historyList">
-              <li class="list-group-item text-center py-3">Loading...</li>
-            </ul>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Interest Analysis Chart (Scatter Plot) -->
-      <div class="row mb-4 mt-4">
-        <div class="col-12">
-          <div class="card shadow-sm border-0">
-            <div class="card-header py-3 bg-white">
-              <h6 class="m-0 fw-bold text-primary">📈 วิเคราะห์ความสนใจ (Interest Analysis)</h6>
-            </div>
-            <div class="card-body">
-              <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-                <canvas id="interestChart"></canvas>
-              </div>
-              <small class="text-muted mt-2 d-block text-center">แกน X: จำนวนรหัสทั้งหมด (Supply) | แกน Y: จำนวนที่ถูกใช้ (Demand)</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Single Book Analysis -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card shadow-sm border-0">
-            <div class="card-header py-3 bg-white">
-              <h6 class="m-0 fw-bold text-primary">🔍 วิเคราะห์รายหนังสือ (Single Book Analysis)</h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3" style="max-width: 500px;">
-                    <label for="bookSelector" class="form-label">เลือกหนังสือ:</label>
-                    <select id="bookSelector" class="form-select">
-                        <option selected value="">-- กรุณาเลือกหนังสือ --</option>
-                    </select>
-                </div>
-                <div id="singleBookAnalysisResult" style="min-height: 100px;" class="text-center text-muted d-flex align-items-center justify-content-center p-3">
-                    <p>เลือกหนังสือเพื่อดูข้อมูล</p>
-                </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div class="mt-4 text-white-50 small">
+      &copy; 2024 Star Up Project
     </div>
   </div>
+</div>
 
-  <!-- Footer -->
-  <div id="footer"></div>
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<!-- Vanta Birds -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.birds.min.js"></script>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- App Scripts -->
-  <script src="js/settings.js"></script>
-  <script src="js/layout.js"></script>
-  <script src="js/dashboard.js"></script>
+<script>
+VANTA.BIRDS({
+  el: "#vanta-bg",
+
+  mouseControls: true,
+  touchControls: true,
+  gyroControls: false,
+
+  backgroundColor: 0x0b0f14,
+  color1: 0x6aa9ff,
+  color2: 0xbfd7ff,
+
+  birdSize: 1.0,
+  wingSpan: 20,
+  speedLimit: 2.5,
+  separation: 60,
+  alignment: 40,
+  cohesion: 40,
+  quantity: 4,
+
+  scale: 1.0,
+  scaleMobile: 0.8
+})
+</script>
 
 </body>
 </html>
