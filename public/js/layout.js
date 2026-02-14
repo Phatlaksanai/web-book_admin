@@ -12,6 +12,13 @@ fetch("/components/navbar.html")
     if (typeof applySettings === 'function') {
       applySettings();
     }
+
+    // ✅ Hide Add Admin menu for non-admins
+    const role = localStorage.getItem('role');
+    const addAdminBtn = document.querySelector('a[href="/addadmin"]');
+    if (addAdminBtn && role !== 'admin') {
+      addAdminBtn.style.display = 'none';
+    }
   });
 
 async function logout(e) {

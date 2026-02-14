@@ -146,6 +146,10 @@
       <a href="register.html" class="btn btn-custom btn-outline-custom text-decoration-none">
         ลงทะเบียน (Register)
       </a>
+      <!-- Download App Button (Hidden by default) -->
+      <a id="downloadAppBtn" href="#" target="_blank" class="btn btn-custom btn-outline-custom text-decoration-none border-info text-info" style="display: none;">
+        📱 ดาวน์โหลดแอป (Download App)
+      </a>
     </div>
 
     <div class="mt-4 text-white-50 small">
@@ -182,6 +186,17 @@ VANTA.BIRDS({
   scale: 1.0,
   scaleMobile: 0.8
 })
+
+// ✅ Fetch Download Link
+fetch('/api/settings/download-link')
+  .then(res => res.json())
+  .then(data => {
+    if (data.link && data.link.trim() !== '') {
+      const btn = document.getElementById('downloadAppBtn');
+      btn.href = data.link;
+      btn.style.display = 'block';
+    }
+  });
 </script>
 
 </body>

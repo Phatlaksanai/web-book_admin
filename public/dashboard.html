@@ -175,6 +175,25 @@
         </div>
       </div>
 
+      <!-- Admin Settings (Hidden by default) -->
+      <div class="row mb-4" id="adminSettingsSection" style="display: none;">
+        <div class="col-12">
+          <div class="card shadow-sm border-0 border-start border-4 border-danger">
+            <div class="card-header py-3 bg-white">
+              <h6 class="m-0 fw-bold text-danger">⚙️ ตั้งค่าระบบ (Admin Settings)</h6>
+            </div>
+            <div class="card-body">
+              <label class="form-label">ลิงก์ดาวน์โหลดแอปพลิเคชัน (App Download Link)</label>
+              <div class="input-group">
+                <input type="text" id="appLinkInput" class="form-control" placeholder="https://play.google.com/store/apps/...">
+                <button class="btn btn-danger" onclick="saveAppLink()">บันทึก (Save)</button>
+              </div>
+              <small class="text-muted">ลิงก์นี้จะไปปรากฏที่หน้า Welcome เพื่อให้ผู้ใช้ดาวน์โหลดแอป</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -190,6 +209,51 @@
   <script src="js/settings.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/dashboard.js"></script>
+  
+  <script>
+    // ✅ Admin Settings Logic
+    document.addEventListener('DOMContentLoaded', async () => {
+      let role = localStorage.getItem('role');
+      const token = localStorage.getItem('token');
+
+      // 🛡️ ถ้ามี Token แต่ไม่มี Role (เช่น Login ค้างไว้ก่อนแก้ระบบ) ให้ดึงใหม่จาก Server
+      if (token && !role) {
+        try {
+          const res = await fetch('/api/auth/me', { headers: { 'x-auth-token': token } });
+          if (res.ok) {
+            const user = await res.json();
+            role = user.role;
+            localStorage.setItem('role', role); // บันทึกค่าใหม่
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      if (role === 'admin') {
+        document.getElementById('adminSettingsSection').style.display = 'block';
+        
+        // Load current link
+        fetch('/api/settings/download-link')
+          .then(res => res.json())
+          .then(data => {
+            if(data.link) document.getElementById('appLinkInput').value = data.link;
+          });
+      }
+    });
+
+    async function saveAppLink() {
+      const link = document.getElementById('appLinkInput').value;
+      const token = localStorage.getItem('token');
+      
+      const res = await fetch('/api/settings/download-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify({ link })
+      });
+
+      if(res.ok) alert('บันทึก Link เรียบร้อยแล้ว!');
+      else alert('เกิดข้อผิดพลาดในการบันทึก');
+    }
+  </script>
 
 </body>
 </html>

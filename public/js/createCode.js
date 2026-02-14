@@ -20,7 +20,11 @@ async function loadBooksForSelection() {
         const datalist = document.getElementById('bookOptions');
         datalist.innerHTML = ''; // Clear existing options
 
-        books.forEach(book => {
+        // ✅ Filter books based on role (Librarian sees only their own books)
+        const role = localStorage.getItem('role');
+        const filteredBooks = (role === 'admin') ? books : books.filter(b => b.isOwner);
+
+        filteredBooks.forEach(book => {
             const option = document.createElement('option');
             option.value = book.title;
             option.dataset.id = book._id; // Store ID in data attribute

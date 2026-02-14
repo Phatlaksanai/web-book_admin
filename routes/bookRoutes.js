@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const BookCode = require("../models/BookCode");
+const Book = require("../models/Book");
+const User = require("../models/User");
 
 /* =========================
  CONTROLLERS
@@ -29,7 +31,30 @@ const upload = require("../middleware/upload");
 ========================= */
 router.get("/bookcodes", auth, getBookCodes);
 
-router.post("/createcode", auth, createBookCode);
+router.post("/createcode", auth, async (req, res, next) => {
+  try {
+    const userId = req.user.id || req.user._id || req.user;
+    const user = await User.findById(userId);
+
+    // ถ้าเป็น Admin ให้ผ่านได้เลย
+    if (user && user.role === 'admin') {
+      return next();
+    }
+
+    // ถ้าเป็น Librarian ต้องเช็คว่าเป็นเจ้าของหนังสือไหม
+    const { bookId } = req.body;
+    const book = await Book.findById(bookId);
+    
+    if (!book) return res.status(404).json({ message: "Book not found" });
+    if (book.addedBy.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "คุณไม่มีสิทธิ์สร้างรหัสสำหรับหนังสือเล่มนี้ (เฉพาะเจ้าของหนังสือเท่านั้น)" });
+    }
+
+    next();
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+}, createBookCode);
 
 // QR Code
 router.post(
