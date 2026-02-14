@@ -26,6 +26,14 @@
       <input id="password" type="password" placeholder="••••••••">
     </div>
 
+    <div class="form-group">
+      <label>Role</label>
+      <select id="role" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white; outline: none;">
+        <option value="librarian" style="color: black;">Librarian</option>
+        <option value="admin" style="color: black;">Admin</option>
+      </select>
+    </div>
+
     <button class="btn w-100" onclick="register()">Register</button>
 
     <div id="result" class="mt-2 text-danger"></div>
@@ -76,11 +84,12 @@ VANTA.BIRDS({
 async function register() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  const role = document.getElementById('role').value;
 
   const res = await fetch('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ email, password, role })
   });
 
   const data = await res.json();

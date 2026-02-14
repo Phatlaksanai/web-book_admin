@@ -107,6 +107,7 @@ async function login() {
 
   if (res.ok) {
     localStorage.setItem('token', data.token); // ✅ สำคัญ
+    if (data.role) localStorage.setItem('role', data.role); // ✅ บันทึก Role
     window.location.href = 'dashboard.html';   // ✅ ไป dashboard
   } else {
     document.getElementById('result').innerText =
