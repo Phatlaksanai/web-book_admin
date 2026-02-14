@@ -183,12 +183,19 @@
               <h6 class="m-0 fw-bold text-danger">⚙️ ตั้งค่าระบบ (Admin Settings)</h6>
             </div>
             <div class="card-body">
-              <label class="form-label">ลิงก์ดาวน์โหลดแอปพลิเคชัน (App Download Link)</label>
-              <div class="input-group">
+              <label class="form-label">ลิงก์ดาวน์โหลด (Android / Google Play)</label>
+              <div class="input-group mb-3">
                 <input type="text" id="appLinkInput" class="form-control" placeholder="https://play.google.com/store/apps/...">
                 <button class="btn btn-danger" onclick="saveAppLink()">บันทึก (Save)</button>
               </div>
-              <small class="text-muted">ลิงก์นี้จะไปปรากฏที่หน้า Welcome เพื่อให้ผู้ใช้ดาวน์โหลดแอป</small>
+
+              <label class="form-label">ลิงก์ดาวน์โหลด (iOS / App Store)</label>
+              <div class="input-group">
+                <input type="text" id="appLinkInputIos" class="form-control" placeholder="https://apps.apple.com/...">
+                <button class="btn btn-danger" onclick="saveAppLinkIos()">บันทึก (Save)</button>
+              </div>
+
+              <small class="text-muted mt-3 d-block">ลิงก์เหล่านี้จะไปปรากฏที่หน้า Welcome เพื่อให้ผู้ใช้ดาวน์โหลดแอป</small>
               
               <div class="mt-4 pt-3 border-top">
                 <label class="form-label mb-2">จัดการผู้ใช้งาน (User Management)</label>
@@ -237,10 +244,11 @@
         document.getElementById('adminSettingsSection').style.display = 'block';
         
         // Load current link
-        fetch('/api/settings/download-link')
+        fetch('/api/settings/download-links')
           .then(res => res.json())
           .then(data => {
-            if(data.link) document.getElementById('appLinkInput').value = data.link;
+            if(data.android) document.getElementById('appLinkInput').value = data.android;
+            if(data.ios) document.getElementById('appLinkInputIos').value = data.ios;
           });
       }
     });
@@ -256,6 +264,20 @@
       });
 
       if(res.ok) alert('บันทึก Link เรียบร้อยแล้ว!');
+      else alert('เกิดข้อผิดพลาดในการบันทึก');
+    }
+
+    async function saveAppLinkIos() {
+      const link = document.getElementById('appLinkInputIos').value;
+      const token = localStorage.getItem('token');
+      
+      const res = await fetch('/api/settings/download-link-ios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify({ link })
+      });
+
+      if(res.ok) alert('บันทึก iOS Link เรียบร้อยแล้ว!');
       else alert('เกิดข้อผิดพลาดในการบันทึก');
     }
   </script>

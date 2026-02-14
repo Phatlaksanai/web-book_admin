@@ -99,6 +99,48 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Store Buttons */
+    .store-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      min-width: 160px;
+    }
+    .store-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      color: white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .store-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      fill: currentColor;
+    }
+    .store-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.2;
+    }
+    .store-text small {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
+    .store-text span {
+      font-size: 1rem;
+      font-weight: bold;
+    }
   </style>
   <script>
     // ถ้ามี token ให้ไป dashboard เลย
@@ -140,16 +182,32 @@
     </div>
     
     <div class="d-flex flex-column gap-3">
-      <a href="login.html" class="btn btn-custom btn-primary-custom text-decoration-none">
+      <a href="login.html" class="btn btn-custom btn-primary-custom text-decoration-none mb-2">
         เข้าสู่ระบบ (Login)
       </a>
-      <!-- <a href="register.html" class="btn btn-custom btn-outline-custom text-decoration-none">
-        ลงทะเบียน (Register)
-      </a> -->
+      
+      <!-- Download Buttons Container -->
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
       <!-- Download App Button (Hidden by default) -->
-      <a id="downloadAppBtn" href="#" target="_blank" class="btn btn-custom btn-outline-custom text-decoration-none border-info text-info" style="display: none;">
-        📱 ดาวน์โหลดแอป (Download App)
+      <a id="downloadAppBtn" href="#" target="_blank" class="store-btn" style="display: none;">
+        <svg class="store-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M14.222 9.374c1.037-.61 1.037-2.137 0-2.748L11.528 5.04 8.32 8l3.208 2.96zm-12.44 2.28L4.06 8 1.782 5.346a1.56 1.56 0 0 0 0 2.748zM8 15l3.208-2.96L8 9.04l-3.208 2.998zm0-14L4.792 4.04 8 7.002 11.208 4.04z"/>
+        </svg>
+        <div class="store-text">
+          <small>Get it on</small>
+          <span>Google Play</span>
+        </div>
       </a>
+      <a id="downloadAppBtnIos" href="#" target="_blank" class="store-btn" style="display: none;">
+        <svg class="store-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M11.182.008C10.148-.03 9.05.235 8.058.715c-.992.48-1.813 1.247-2.433 2.136C4.422 4.012 4 5.57 4 7.15c0 .01.002.015.002.022h.002c.002.006.004.01.006.014a.06.06 0 0 0 .01.005c.003.002.005.004.008.006l.002.001c.003.002.005.003.007.005h.001c.003.001.005.002.008.004a.06.06 0 0 0 .01.004c.004.002.006.004.009.005a.06.06 0 0 0 .01.003c.005.001.007.003.01.004.001.001.002.002.004.002.01.001.02.001.033.004.006.002.014.004.02.007.012.005.025.011.039.018.009.004.019.009.029.015.008.005.017.01.025.016.009.005.018.011.028.017.01.006.02.012.031.019.016.01.033.02.05.031.004.003.009.006.013.008.004.003.009.006.013.009.013.009.027.018.04.028.004.003.009.006.013.01.013.01.027.02.04.031.003.002.006.005.009.007.014.011.028.023.042.035.003.002.006.005.009.008.014.012.028.025.042.038.003.002.006.005.009.008.014.013.028.027.042.041.003.003.006.006.009.009.014.014.028.029.042.044.003.003.006.006.009.01.014.015.028.031.041.047.003.003.006.007.009.01.013.016.027.033.04.05.003.004.006.008.009.012.013.017.026.035.039.053.003.004.006.008.009.013.012.018.024.037.036.056.002.004.005.008.008.012.011.019.022.039.033.059.002.004.005.008.007.012.01.02.02.041.03.062.002.004.004.008.006.013.009.021.018.043.027.065.002.004.004.009.006.013.008.022.016.045.024.068.001.004.003.009.005.013.007.023.014.047.021.071.001.004.003.009.004.013.006.024.012.049.018.074.001.004.002.009.004.013.005.025.01.051.015.077.001.004.002.009.003.014.004.026.008.053.012.08.001.004.001.009.002.014.003.027.006.055.009.083.001.005.001.009.002.014.002.028.004.057.006.086"/>
+        </svg>
+        <div class="store-text">
+          <small>Download on the</small>
+          <span>App Store</span>
+        </div>
+      </a>
+      </div>
     </div>
 
     <div class="mt-4 text-white-50 small">
@@ -187,14 +245,19 @@ VANTA.BIRDS({
   scaleMobile: 0.8
 })
 
-// ✅ Fetch Download Link
-fetch('/api/settings/download-link')
+// ✅ Fetch Download Links
+fetch('/api/settings/download-links')
   .then(res => res.json())
   .then(data => {
-    if (data.link && data.link.trim() !== '') {
+    if (data.android && data.android.trim() !== '') {
       const btn = document.getElementById('downloadAppBtn');
-      btn.href = data.link;
+      btn.href = data.android;
       btn.style.display = 'block';
+    }
+    if (data.ios && data.ios.trim() !== '') {
+      const btnIos = document.getElementById('downloadAppBtnIos');
+      btnIos.href = data.ios;
+      btnIos.style.display = 'block';
     }
   });
 </script>

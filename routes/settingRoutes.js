@@ -19,12 +19,17 @@ const checkAdmin = async (req, res, next) => {
   }
 };
 
-// GET Link (Public - ใครก็เรียกได้)
-router.get('/download-link', async (req, res) => {
+// GET Links (Public - ใครก็เรียกได้)
+router.get('/download-links', async (req, res) => {
   try {
-    const setting = await Setting.findOne({ key: 'appDownloadLink' });
-    res.json({ link: setting ? setting.value : '' });
+    const settings = await Setting.find({ key: { $in: ['appDownloadLink', 'appDownloadLinkIos'] } });
+    const links = {
+      android: settings.find(s => s.key === 'appDownloadLink')?.value || '',
+      ios: settings.find(s => s.key === 'appDownloadLinkIos')?.value || ''
+    };
+    res.json(links);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 });
@@ -38,7 +43,22 @@ router.post('/download-link', auth, checkAdmin, async (req, res) => {
       { value: link },
       { upsert: true, new: true }
     );
-    res.json({ message: 'Link updated successfully' });
+    res.json({ message: 'Android link updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// POST iOS Link (Admin Only - บันทึกค่า)
+router.post('/download-link-ios', auth, checkAdmin, async (req, res) => {
+  try {
+    const { link } = req.body;
+    await Setting.findOneAndUpdate(
+      { key: 'appDownloadLinkIos' },
+      { value: link },
+      { upsert: true, new: true }
+    );
+    res.json({ message: 'iOS link updated successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server Error' });
   }
