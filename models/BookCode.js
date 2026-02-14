@@ -22,7 +22,7 @@ const BookCodeSchema = new mongoose.Schema({
   // ✅ เพิ่มตรงนี้
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "users",
     default: null,
   },
 

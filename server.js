@@ -14,6 +14,7 @@ const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const settingRoutes = require("./routes/settingRoutes");
 const Admin = require("./models/User");
+require("./models/UserForapp"); // ✅ Register App User Model
 const app = express();
 
 /* CONNECT DB */
@@ -105,6 +106,9 @@ app.get("/createCode", auth, (req, res) => {
 });
 app.get("/addadmin", auth, checkAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "addAdmin.html"));
+});
+app.get("/manage-users", auth, checkAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "manageAppUsers.html"));
 });
 
 /* START */

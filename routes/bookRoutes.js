@@ -70,6 +70,49 @@ router.post(
   generateBarcode
 );
 
+// ✅ Get Redeemed Codes (Admin Only) - ดูรายการหนังสือที่ถูกผู้ใช้ App รับไปแล้ว
+router.get("/redeemed", auth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const admin = await User.findById(userId);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ message: "Access Denied" });
+    }
+
+    const codes = await BookCode.find({ used: true })
+      .populate('user', 'email profilePic') // ดึงข้อมูลผู้ใช้ App
+      .populate('bookId', 'title coverImage') // ดึงข้อมูลหนังสือ
+      .sort({ updatedAt: -1 });
+      
+    res.json(codes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// ✅ Revoke Code (Admin Only) - ยกเลิกสิทธิ์การอ่าน (ดึงหนังสือคืน)
+router.post("/revoke/:id", auth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const admin = await User.findById(userId);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ message: "Access Denied" });
+    }
+
+    const code = await BookCode.findById(req.params.id);
+    if (!code) return res.status(404).json({ message: "Code not found" });
+
+    code.used = false;
+    code.user = null; // ลบความเชื่อมโยงกับผู้ใช้
+    await code.save();
+
+    res.json({ message: "Revoked successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 // delete book code
 router.delete("/bookcodes/:id", auth, async (req, res) => {
   try {
