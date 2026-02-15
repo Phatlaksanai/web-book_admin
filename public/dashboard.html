@@ -240,7 +240,7 @@
         } catch (e) { console.error(e); }
       }
 
-      if (role === 'admin') {
+      if (role === 'admin' || role === 'librarian') {
         document.getElementById('adminSettingsSection').style.display = 'block';
         
         // Load current link
