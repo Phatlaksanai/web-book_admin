@@ -228,20 +228,22 @@
       let role = localStorage.getItem('role');
       const token = localStorage.getItem('token');
 
-      // 🛡️ ถ้ามี Token แต่ไม่มี Role (เช่น Login ค้างไว้ก่อนแก้ระบบ) ให้ดึงใหม่จาก Server
-      if (token && !role) {
+      // 🛡️ ดึงข้อมูล User ล่าสุดเสมอ เพื่อความชัวร์เรื่อง Role (แก้ปัญหา Role ค้างจาก User เก่า)
+      if (token) {
         try {
           const res = await fetch('/api/auth/me', { headers: { 'x-auth-token': token } });
           if (res.ok) {
             const user = await res.json();
             role = user.role;
-            localStorage.setItem('role', role); // บันทึกค่าใหม่
+            localStorage.setItem('role', role); // อัปเดต Role ให้ตรงกับ Database
           }
         } catch (e) { console.error(e); }
       }
 
-      if (role === 'admin' || role === 'librarian') {
-        document.getElementById('adminSettingsSection').style.display = 'block';
+      const adminSection = document.getElementById('adminSettingsSection');
+
+      if (role === 'admin') {
+        if (adminSection) adminSection.style.display = 'block';
         
         // Load current link
         fetch('/api/settings/download-links')
@@ -250,6 +252,9 @@
             if(data.android) document.getElementById('appLinkInput').value = data.android;
             if(data.ios) document.getElementById('appLinkInputIos').value = data.ios;
           });
+      } else {
+        // ✅ ถ้าไม่ใช่ Admin ให้ลบส่วนนี้ออกจาก DOM เลยเพื่อความปลอดภัย
+        if (adminSection) adminSection.remove();
       }
     });
 

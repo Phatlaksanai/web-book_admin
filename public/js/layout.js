@@ -31,6 +31,7 @@ async function logout(e) {
   });
 
   localStorage.removeItem('token'); // ✅ ลบ Token เพื่อไม่ให้เด้งกลับเข้า Dashboard
+  localStorage.removeItem('role');  // ✅ ลบ Role ออกด้วย เพื่อป้องกันสิทธิ์ค้าง
   window.location.href = "/index.html"; // ✅ กลับไปหน้า Welcome
 }
 fetch("/components/footer.html")
