@@ -92,6 +92,26 @@ router.get("/redeemed", auth, async (req, res) => {
   }
 });
 
+// ✅ Get All App Users List (Admin Only)
+router.get("/app-users-list", auth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const admin = await User.findById(userId);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ message: "Access Denied" });
+    }
+
+    const userRef = BookCode.schema.path('user').options.ref;
+    const AppUser = mongoose.model(userRef);
+
+    const users = await AppUser.find().select('-password').sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 // ✅ Delete App User (Admin Only)
 router.delete("/app-users/:id", auth, async (req, res) => {
   try {

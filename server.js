@@ -110,6 +110,9 @@ app.get("/addadmin", auth, checkAdmin, (req, res) => {
 app.get("/manage-users", auth, checkAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "manageAppUsers.html"));
 });
+app.get("/all-users", auth, checkAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "manageUsers.html"));
+});
 
 /* START */
 app.listen(2000, () => {

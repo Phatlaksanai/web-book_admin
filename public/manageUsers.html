@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage All Users | Star Up</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/y2k.css" id="theme-link" />
+</head>
+<body class="bg-light">
+
+  <div id="navbar"></div>
+
+  <div class="container mt-5 mb-5" style="max-width: 1200px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold text-dark">👥 จัดการผู้ใช้งาน (User Management)</h2>
+        <p class="text-muted">รายชื่อผู้ใช้งานทั้งหมดในระบบ (Web & App)</p>
+      </div>
+      <a href="/dashboard.html" class="btn btn-outline-secondary">← กลับ Dashboard</a>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-bold" id="web-tab" data-bs-toggle="tab" data-bs-target="#web-users" type="button" role="tab">
+          🖥️ Web Users (Librarians)
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold" id="app-tab" data-bs-toggle="tab" data-bs-target="#app-users" type="button" role="tab">
+          📱 App Users (Readers)
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="userTabsContent">
+      
+      <!-- Tab 1: Web Users -->
+      <div class="tab-pane fade show active" id="web-users" role="tabpanel">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4 py-3">Email</th>
+                    <th class="py-3">Role</th>
+                    <th class="py-3">Created At</th>
+                    <th class="py-3 text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="webUserTable">
+                  <tr><td colspan="4" class="text-center py-5">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: App Users -->
+      <div class="tab-pane fade" id="app-users" role="tabpanel">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4 py-3">User</th>
+                    <th class="py-3">Email</th>
+                    <th class="py-3">Joined Date</th>
+                    <th class="py-3 text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="appUserTable">
+                  <tr><td colspan="4" class="text-center py-5">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/layout.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadWebUsers();
+      loadAppUsers();
+    });
+
+    const token = localStorage.getItem('token');
+
+    // --- 1. Load Web Users (Librarians) ---
+    async function loadWebUsers() {
+      try {
+        const res = await fetch('/api/auth/users', { headers: { 'x-auth-token': token } });
+        const users = await res.json();
+        const tbody = document.getElementById('webUserTable');
+        tbody.innerHTML = '';
+
+        if (users.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">ไม่พบผู้ดูแลระบบอื่นๆ</td></tr>`;
+          return;
+        }
+
+        users.forEach(u => {
+          const date = new Date(u.createdAt).toLocaleDateString('th-TH');
+          tbody.innerHTML += `
+            <tr>
+              <td class="ps-4 fw-bold text-primary">${u.email}</td>
+              <td><span class="badge bg-info text-dark">${u.role}</span></td>
+              <td class="text-secondary">${date}</td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteWebUser('${u._id}')">ลบ (Delete)</button>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (err) { console.error(err); }
+    }
+
+    // --- 2. Load App Users (Readers) ---
+    async function loadAppUsers() {
+      try {
+        const res = await fetch('/api/books/app-users-list', { headers: { 'x-auth-token': token } });
+        const users = await res.json();
+        const tbody = document.getElementById('appUserTable');
+        tbody.innerHTML = '';
+
+        if (users.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">ยังไม่มีผู้ใช้งานแอปพลิเคชัน</td></tr>`;
+          return;
+        }
+
+        users.forEach(u => {
+          const date = new Date(u.createdAt).toLocaleDateString('th-TH');
+          const pic = u.profilePic || 'https://via.placeholder.com/40';
+          tbody.innerHTML += `
+            <tr>
+              <td class="ps-4">
+                <div class="d-flex align-items-center">
+                  <img src="${pic}" class="rounded-circle me-3" width="40" height="40" style="object-fit:cover;">
+                  <span class="fw-bold text-dark">${u.username || 'No Name'}</span>
+                </div>
+              </td>
+              <td>${u.email}</td>
+              <td class="text-secondary">${date}</td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-danger" onclick="deleteAppUser('${u._id}')">ลบผู้ใช้ (Delete)</button>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (err) { console.error(err); }
+    }
+
+    // --- Delete Functions ---
+    async function deleteWebUser(id) {
+      if (!confirm('ต้องการลบ Librarian คนนี้ใช่หรือไม่?')) return;
+      const res = await fetch(`/api/auth/users/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-auth-token': token }
+      });
+      if (res.ok) { alert('ลบสำเร็จ'); loadWebUsers(); }
+      else { alert('เกิดข้อผิดพลาด'); }
+    }
+
+    async function deleteAppUser(id) {
+      if (!confirm('⚠️ คำเตือน: การลบผู้ใช้แอปจะทำให้ประวัติการอ่านหายไปทั้งหมด ยืนยันหรือไม่?')) return;
+      const res = await fetch(`/api/books/app-users/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-auth-token': token }
+      });
+      if (res.ok) { alert('ลบผู้ใช้เรียบร้อย'); loadAppUsers(); }
+      else { alert('เกิดข้อผิดพลาด'); }
+    }
+  </script>
+</body>
+</html>
