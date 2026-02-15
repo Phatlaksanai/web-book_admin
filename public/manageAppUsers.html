@@ -79,6 +79,7 @@
       codes.forEach(item => {
         const userEmail = item.user ? item.user.email : '<span class="text-muted">Unknown User</span>';
         const userPic = item.user && item.user.profilePic ? item.user.profilePic : 'https://via.placeholder.com/40';
+        const userId = item.user ? item.user._id : null;
         
         const bookTitle = item.bookId ? item.bookId.title : item.bookTitle;
         const bookCover = item.bookId && item.bookId.coverImage ? item.bookId.coverImage.url : '';
@@ -107,6 +108,7 @@
               <button class="btn btn-sm btn-outline-danger" onclick="revokeAccess('${item._id}')">
                 ดึงคืน (Revoke)
               </button>
+              ${userId ? `<button class="btn btn-sm btn-danger ms-2" onclick="deleteAppUser('${userId}')">ลบผู้ใช้</button>` : ''}
             </td>
           </tr>
         `;
@@ -129,6 +131,44 @@
           loadRedeemedCodes(); // Reload table
         } else {
           alert('เกิดข้อผิดพลาด');
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function deleteAppUser(userId) {
+      if (!confirm('⚠️ คำเตือน: คุณต้องการลบผู้ใช้งานรายนี้ออกจากระบบถาวรใช่หรือไม่?')) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/books/app-users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'x-auth-token': token }
+        });
+
+        if (res.ok) {
+          alert('ลบผู้ใช้งานเรียบร้อยแล้ว');
+          loadRedeemedCodes();
+        } else {
+          alert('เกิดข้อผิดพลาดในการลบผู้ใช้');
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function deleteAppUser(userId) {
+      if (!confirm('⚠️ คำเตือน: คุณต้องการลบผู้ใช้งานรายนี้ออกจากระบบถาวรใช่หรือไม่?')) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/books/app-users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'x-auth-token': token }
+        });
+
+        if (res.ok) {
+          alert('ลบผู้ใช้งานเรียบร้อยแล้ว');
+          loadRedeemedCodes();
+        } else {
+          alert('เกิดข้อผิดพลาดในการลบผู้ใช้');
         }
       } catch (err) { console.error(err); }
     }

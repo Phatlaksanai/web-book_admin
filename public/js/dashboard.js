@@ -1,5 +1,6 @@
 let chartInstance = null;
 let dashboardData = null;
+let bookIdMap = {}; // ✅ เก็บ Mapping Title -> ID สำหรับลบ
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -9,6 +10,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     dashboardData = await res.json();
     const { totalBooks, myBooks, totalCodes, usedCodes, history, bookStats } = dashboardData;
+
+    // ✅ ถ้าเป็น Admin ให้ดึงข้อมูลหนังสือทั้งหมดมาเพื่อเอา ID ไว้สำหรับปุ่มลบ
+    const role = localStorage.getItem('role');
+    if (role === 'admin') {
+      fetch('/api/books', { headers: { 'x-auth-token': localStorage.getItem('token') } })
+        .then(res => res.json())
+        .then(books => books.forEach(b => bookIdMap[b.title] = b._id))
+        .catch(err => console.error("Error loading book IDs", err));
+    }
 
     // 2. Update Stats Cards
     if(document.getElementById("totalBooks")) document.getElementById("totalBooks").innerText = totalBooks;
@@ -208,6 +218,17 @@ function displaySingleBookAnalysis(title) {
     const available = total - used;
     const percentage = total > 0 ? ((used / total) * 100).toFixed(1) : 0;
 
+    // ✅ เพิ่มปุ่มลบหนังสือ (เฉพาะ Admin)
+    const role = localStorage.getItem('role');
+    const bookId = bookIdMap[title] || bookData._id;
+    let deleteBtn = '';
+    
+    if (role === 'admin' && bookId) {
+        deleteBtn = `<div class="mt-3 pt-3 border-top">
+            <button class="btn btn-outline-danger w-100" onclick="deleteBookFromDashboard('${bookId}')">🗑️ ลบหนังสือเล่มนี้ (Admin Only)</button>
+        </div>`;
+    }
+
     resultDiv.className = 'text-start p-3';
     resultDiv.innerHTML = `
         <div class="row align-items-center">
@@ -229,7 +250,31 @@ function displaySingleBookAnalysis(title) {
                 <small class="text-muted mt-1 d-block">
                     รหัสถูกใช้ไป ${used} จากทั้งหมด ${total} รหัส
                 </small>
+                ${deleteBtn}
             </div>
         </div>
     `;
+}
+
+// ✅ ฟังก์ชันลบหนังสือจาก Dashboard
+window.deleteBookFromDashboard = async function(id) {
+    if (!confirm("⚠️ คำเตือน: คุณต้องการลบหนังสือเล่มนี้ออกจากระบบถาวรใช่หรือไม่?")) return;
+    
+    try {
+        const res = await fetch("/api/books/" + id, { 
+            method: "DELETE",
+            headers: { 'x-auth-token': localStorage.getItem('token') }
+        });
+        
+        if (res.ok) {
+            alert("ลบหนังสือสำเร็จ");
+            window.location.reload();
+        } else {
+            const data = await res.json();
+            alert(data.message || "เกิดข้อผิดพลาด");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Server Error");
+    }
 }

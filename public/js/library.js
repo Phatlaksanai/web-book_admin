@@ -21,6 +21,8 @@ function renderBooks(books) {
   const container = document.getElementById("book-list");
   container.innerHTML = "";
 
+  const role = localStorage.getItem('role');
+
   if (books.length === 0) {
     container.innerHTML = `<div class="col-12 text-center py-5 text-muted">ไม่พบหนังสือ</div>`;
     return;
@@ -65,7 +67,7 @@ function renderBooks(books) {
           </a>
 
           ${
-            book.isOwner
+            book.isOwner || role === 'admin'
               ? `<div class="d-flex gap-2 mt-3 pt-3 border-top">
                    <button class="btn btn-warning btn-sm flex-fill" onclick="editBook('${book._id}')">
                      Edit
@@ -96,9 +98,17 @@ function editBook(id) {
 async function deleteBook(id) {
   if (!confirm("ลบหนังสือเล่มนี้?")) return;
 
-  await fetch("/api/books/" + id, { method: "DELETE" });
-
-  document.getElementById(`book-${id}`)?.remove();
+  try {
+    const res = await fetch("/api/books/" + id, { 
+      method: "DELETE",
+      headers: { 'x-auth-token': localStorage.getItem('token') }
+    });
+    if (res.ok) {
+      document.getElementById(`book-${id}`)?.remove();
+    } else {
+      alert("เกิดข้อผิดพลาดในการลบ");
+    }
+  } catch (err) { console.error(err); }
 }
 
 window.setSearch = function(keyword) {

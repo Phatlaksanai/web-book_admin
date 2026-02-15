@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const BookCode = require("../models/BookCode");
 const Book = require("../models/Book");
@@ -91,6 +92,25 @@ router.get("/redeemed", auth, async (req, res) => {
   }
 });
 
+// ✅ Delete App User (Admin Only)
+router.delete("/app-users/:id", auth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const admin = await User.findById(userId);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ message: "Access Denied" });
+    }
+
+    const AppUser = mongoose.models.User || mongoose.model('User');
+    await AppUser.findByIdAndDelete(req.params.id);
+    await BookCode.updateMany({ user: req.params.id }, { user: null, used: false });
+
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 // ✅ Revoke Code (Admin Only) - ยกเลิกสิทธิ์การอ่าน (ดึงหนังสือคืน)
 router.post("/revoke/:id", auth, async (req, res) => {
   try {
@@ -170,21 +190,29 @@ router.put(
 /* =========================
  ❌ DELETE BOOK
 ========================= */
-router.delete("/:id", auth, deleteBook);
-router.delete("/bookcodes/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
-    const { id } = req.params;
+    const userId = req.user.id || req.user._id || req.user;
+    const user = await User.findById(userId);
+    const book = await Book.findById(req.params.id);
 
-    const deleted = await BookCode.findByIdAndDelete(id);
+    if (!book) return res.status(404).json({ message: "Book not found" });
 
-    if (!deleted) {
-      return res.status(404).json({ message: "ไม่พบข้อมูล" });
+    // Allow if Admin OR Owner
+    const isAdmin = user && user.role === 'admin';
+    const isOwner = book.addedBy && book.addedBy.toString() === userId.toString();
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ message: "Access Denied" });
     }
 
-    res.json({ message: "ลบสำเร็จ" });
+    await Book.findByIdAndDelete(req.params.id);
+    await BookCode.deleteMany({ bookId: req.params.id });
+
+    res.json({ message: "Book deleted successfully" });
   } catch (err) {
     console.error(err);
-    res.status(500).json(err);
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
