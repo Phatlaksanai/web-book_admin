@@ -153,25 +153,6 @@
         }
       } catch (err) { console.error(err); }
     }
-
-    async function deleteAppUser(userId) {
-      if (!confirm('⚠️ คำเตือน: คุณต้องการลบผู้ใช้งานรายนี้ออกจากระบบถาวรใช่หรือไม่?')) return;
-
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`/api/books/app-users/${userId}`, {
-          method: 'DELETE',
-          headers: { 'x-auth-token': token }
-        });
-
-        if (res.ok) {
-          alert('ลบผู้ใช้งานเรียบร้อยแล้ว');
-          loadRedeemedCodes();
-        } else {
-          alert('เกิดข้อผิดพลาดในการลบผู้ใช้');
-        }
-      } catch (err) { console.error(err); }
-    }
   </script>
 </body>
 </html>

@@ -101,12 +101,20 @@ router.delete("/app-users/:id", auth, async (req, res) => {
       return res.status(403).json({ message: "Access Denied" });
     }
 
-    const AppUser = mongoose.models.User || mongoose.model('User');
-    await AppUser.findByIdAndDelete(req.params.id);
+    // ✅ Determine the correct App User model from BookCode schema reference
+    const userRef = BookCode.schema.path('user').options.ref;
+    const AppUser = mongoose.model(userRef);
+
+    const deletedUser = await AppUser.findByIdAndDelete(req.params.id);
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     await BookCode.updateMany({ user: req.params.id }, { user: null, used: false });
 
     res.json({ message: "User deleted successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 });
