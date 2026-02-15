@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadBooksForSelection() {
     try {
-        const res = await fetch('/api/books');
+        const res = await fetch('/api/books', {
+            headers: { 'x-auth-token': localStorage.getItem('token') }
+        });
         if (!res.ok) throw new Error('Failed to load books');
         const books = await res.json();
 
@@ -37,7 +39,9 @@ async function loadBooksForSelection() {
 
 async function loadExistingCodes() {
     try {
-        const res = await fetch('/api/books/codes');
+        const res = await fetch('/api/books/bookcodes', {
+            headers: { 'x-auth-token': localStorage.getItem('token') }
+        });
         if (!res.ok) {
             let errorMsg = `Status: ${res.status}`;
             try {
@@ -119,9 +123,12 @@ async function handleCreateCode(event) {
     }
 
     try {
-        const res = await fetch('/api/books/code', {
+        const res = await fetch('/api/books/createcode', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-auth-token': localStorage.getItem('token')
+            },
             body: JSON.stringify({ bookId })
         });
 
@@ -144,7 +151,10 @@ window.deleteBookCode = async function(codeId) {
     if (!confirm('คุณต้องการลบรหัสนี้ใช่หรือไม่?')) return;
 
     try {
-        const res = await fetch(`/api/books/code/${codeId}`, { method: 'DELETE' });
+        const res = await fetch(`/api/books/bookcodes/${codeId}`, { 
+            method: 'DELETE',
+            headers: { 'x-auth-token': localStorage.getItem('token') }
+        });
         if (res.ok) {
             alert('ลบรหัสสำเร็จ');
             loadExistingCodes();
