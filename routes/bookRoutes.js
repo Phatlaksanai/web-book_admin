@@ -4,6 +4,7 @@ const router = express.Router();
 const BookCode = require("../models/BookCode");
 const Book = require("../models/Book");
 const User = require("../models/User");
+const cloudinary = require("cloudinary").v2;
 
 /* =========================
  CONTROLLERS
@@ -232,6 +233,15 @@ router.delete("/:id", auth, async (req, res) => {
 
     if (!isAdmin && !isOwner) {
       return res.status(403).json({ message: "Access Denied" });
+    }
+
+    // ✅ Delete files from Cloudinary
+    if (book.coverImage && book.coverImage.public_id) {
+      await cloudinary.uploader.destroy(book.coverImage.public_id);
+    }
+    if (book.pdf && book.pdf.public_id) {
+      await cloudinary.uploader.destroy(book.pdf.public_id); // Try default (image)
+      await cloudinary.uploader.destroy(book.pdf.public_id, { resource_type: 'raw' }); // Try raw
     }
 
     await Book.findByIdAndDelete(req.params.id);
