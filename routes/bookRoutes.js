@@ -168,12 +168,22 @@ router.post("/revoke/:id", auth, async (req, res) => {
 // delete book code
 router.delete("/bookcodes/:id", auth, async (req, res) => {
   try {
-    const deleted = await BookCode.findByIdAndDelete(req.params.id);
-    if (!deleted) {
+    const code = await BookCode.findById(req.params.id);
+    if (!code) {
       return res.status(404).json({ message: "ไม่พบข้อมูล" });
     }
+
+    if (code.qrImage && code.qrImage.public_id) {
+      await cloudinary.uploader.destroy(code.qrImage.public_id);
+    }
+    if (code.barcodeImage && code.barcodeImage.public_id) {
+      await cloudinary.uploader.destroy(code.barcodeImage.public_id);
+    }
+
+    await BookCode.findByIdAndDelete(req.params.id);
     res.json({ message: "ลบสำเร็จ" });
   } catch (err) {
+    console.error(err);
     res.status(500).json(err);
   }
 });
