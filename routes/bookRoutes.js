@@ -5,6 +5,7 @@ const BookCode = require("../models/BookCode");
 const Book = require("../models/Book");
 const User = require("../models/User");
 const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
 
 /* =========================
  CONTROLLERS
@@ -26,7 +27,9 @@ const {
  MIDDLEWARE
 ========================= */
 const auth = require("../middleware/auth");
-const upload = require("../middleware/upload");
+
+// ✅ Custom Upload Middleware: สร้าง Folder ตามชื่อหนังสือ (Title)
+const upload = multer({ storage: multer.memoryStorage() });
 
 /* =========================
  🔑 BOOK CODE ROUTES
@@ -219,39 +222,6 @@ router.put(
 /* =========================
  ❌ DELETE BOOK
 ========================= */
-router.delete("/:id", auth, async (req, res) => {
-  try {
-    const userId = req.user.id || req.user._id || req.user;
-    const user = await User.findById(userId);
-    const book = await Book.findById(req.params.id);
-
-    if (!book) return res.status(404).json({ message: "Book not found" });
-
-    // Allow if Admin OR Owner
-    const isAdmin = user && user.role === 'admin';
-    const isOwner = book.addedBy && book.addedBy.toString() === userId.toString();
-
-    if (!isAdmin && !isOwner) {
-      return res.status(403).json({ message: "Access Denied" });
-    }
-
-    // ✅ Delete files from Cloudinary
-    if (book.coverImage && book.coverImage.public_id) {
-      await cloudinary.uploader.destroy(book.coverImage.public_id);
-    }
-    if (book.pdf && book.pdf.public_id) {
-      await cloudinary.uploader.destroy(book.pdf.public_id); // Try default (image)
-      await cloudinary.uploader.destroy(book.pdf.public_id, { resource_type: 'raw' }); // Try raw
-    }
-
-    await Book.findByIdAndDelete(req.params.id);
-    await BookCode.deleteMany({ bookId: req.params.id });
-
-    res.json({ message: "Book deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" });
-  }
-});
+router.delete("/:id", auth, deleteBook);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const Book = require("../models/Book");
 const BookCode = require("../models/BookCode");
+const User = require("../models/User");
 const cloudinary = require("../config/cloudinary");
 const QRCode = require("qrcode");
 const bwipjs = require("bwip-js");
@@ -39,7 +40,7 @@ exports.createBook = async (req, res) => {
     // ✅ 1) TITLE ต้องไม่ซ้ำ
     // ===============================
     const normalized = normalizeTitle(title);
-    const folderName = normalized; // ใช้ชื่อที่ normalize แล้วเป็นชื่อโฟลเดอร์
+    const folderName = title.trim().replace(/\s+/g, '_'); // ใช้ชื่อหนังสือเป็นชื่อ Folder (แทนช่องว่างด้วย _)
 
     const titleExists = await Book.findOne({
       titleNormalized: normalized,
@@ -393,12 +394,16 @@ exports.deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     const userId = req.session.user?.id;
+    const user = await User.findById(userId);
 
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    if (book.addedBy?.toString() !== userId) {
+    const isAdmin = user && user.role === 'admin';
+    const isOwner = book.addedBy?.toString() === userId;
+
+    if (!isOwner && !isAdmin) {
       return res
         .status(403)
         .json({ message: "Unauthorized to delete this book" });
@@ -424,6 +429,21 @@ exports.deleteBook = async (req, res) => {
       }
     }
     await BookCode.deleteMany({ bookId: book._id });
+
+    // ✅ 3. ลบ Folder ใน Cloudinary (Clean up)
+    if (book.folder) {
+      try {
+        const folderPath = `books/${book.folder}`;
+        // ลบไฟล์ทั้งหมดใน Folder ก่อน (เผื่อมีไฟล์ค้าง)
+        await cloudinary.api.delete_resources_by_prefix(folderPath);
+        await cloudinary.api.delete_resources_by_prefix(folderPath, { resource_type: "raw" });
+        
+        // ลบ Folder
+        await cloudinary.api.delete_folder(folderPath);
+      } catch (err) {
+        console.warn("Cloudinary Folder Delete Warning:", err.message);
+      }
+    }
 
     await book.deleteOne();
     res.json({ message: "Book deleted successfully" });
