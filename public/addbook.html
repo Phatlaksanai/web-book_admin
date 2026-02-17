@@ -84,7 +84,78 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/settings.js"></script>
-  <script src="js/main.js"></script>
   <script src="js/layout.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookId = urlParams.get('id');
+
+    // Check if Edit Mode
+    if (bookId) {
+      document.getElementById('pageTitle').innerText = '✏️ แก้ไขหนังสือ (Edit Book)';
+      document.title = 'Librarian | Edit Book';
+      document.getElementById('submitBtn').innerText = 'บันทึกการแก้ไข';
+      loadBookData(bookId);
+    }
+
+    // Preview Cover
+    document.getElementById('cover').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById('coverPreview');
+          img.src = e.target.result;
+          img.style.display = 'block';
+          document.getElementById('previewText').style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    async function loadBookData(id) {
+      try {
+        const res = await fetch(`/api/books/${id}`, { headers: { 'x-auth-token': token } });
+        if (!res.ok) throw new Error('Failed to fetch book');
+        const book = await res.json();
+
+        document.getElementById('title').value = book.title || '';
+        document.getElementById('detail').value = book.detail || book.description || '';
+        document.getElementById('tags').value = (book.tags || book.category) ? (book.tags || book.category).join(', ') : '';
+
+        if (book.coverImage && book.coverImage.url) {
+          const img = document.getElementById('coverPreview');
+          img.src = book.coverImage.url;
+          img.style.display = 'block';
+          document.getElementById('previewText').style.display = 'none';
+        }
+        
+        const pdfData = book.pdfFile || book.file;
+        if (pdfData) {
+          document.getElementById('pdfFileName').innerText = `📄 ไฟล์ปัจจุบัน: ${pdfData.fileName || (pdfData.url ? pdfData.url.split('/').pop() : 'Existing PDF')}`;
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function submitBook() {
+      const formData = new FormData();
+      formData.append('title', document.getElementById('title').value);
+      formData.append('detail', document.getElementById('detail').value);
+      formData.append('tags', document.getElementById('tags').value);
+      
+      const cover = document.getElementById('cover').files[0];
+      const pdf = document.getElementById('pdf').files[0];
+
+      if (cover) formData.append('cover', cover);
+      if (pdf) formData.append('pdf', pdf);
+
+      const url = bookId ? `/api/books/${bookId}` : '/api/books';
+      const method = bookId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, { method, headers: { 'x-auth-token': token }, body: formData });
+      if (res.ok) { alert('บันทึกสำเร็จ'); window.location.href = '/library.html'; }
+      else { alert('เกิดข้อผิดพลาด'); }
+    }
+  </script>
 </body>
 </html>
