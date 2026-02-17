@@ -250,10 +250,31 @@ exports.getBookById = async (req, res) => {
       return exports.getDashboardData(req, res);
     }
 
-    const book = await Book.findById(req.params.id);
+    // ✅ Use lean() to allow modification of the book object
+    let book = await Book.findById(req.params.id).lean();
 
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
+    }
+
+    // ✅ Check Access Rights (Admin / Owner)
+    const userId = req.user?.id || req.user?._id || req.session?.user?.id;
+    let isAdmin = false;
+    let isOwner = false;
+
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        isAdmin = user.role === 'admin';
+        isOwner = book.addedBy?.toString() === userId.toString();
+      }
+    }
+
+    // 🔒 If not Admin and not Owner -> Show only 30% of pages
+    if (!isAdmin && !isOwner && book.pages && book.pages.length > 0) {
+      const limit = Math.ceil(book.pages.length * 0.3);
+      book.pages = book.pages.slice(0, limit);
+      book.isPreview = true; // Flag for frontend to know it's a preview
     }
 
     res.json(book);
