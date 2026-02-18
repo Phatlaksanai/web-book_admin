@@ -10,6 +10,12 @@
 <!-- Vanta Background -->
 <div id="vanta-bg"></div>
 
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="hidden">
+  <div class="spinner"></div>
+  <p class="mt-3 fw-bold text-dark">กำลังลงทะเบียน...</p>
+</div>
+
 <div class="auth-container">
   <div class="auth-header">
     <h1>Register Librarian</h1>
@@ -74,23 +80,29 @@ VANTA.BIRDS({
 
 <script>
 async function register() {
+  document.getElementById('loading-overlay').classList.remove('hidden');
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   const role = 'librarian';
 
-  const res = await fetch('/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, role })
-  });
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, role })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.message === 'Register success') {
-    alert('Register success! Please login');
-    window.location.href = 'login.html';
-  } else {
-    document.getElementById('result').innerText = data.message;
+    document.getElementById('loading-overlay').classList.add('hidden');
+    if (data.message === 'Register success') {
+      alert('Register success! Please login');
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('result').innerText = data.message;
+    }
+  } catch (err) {
+    document.getElementById('loading-overlay').classList.add('hidden');
   }
 }
 </script>

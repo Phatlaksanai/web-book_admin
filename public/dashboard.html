@@ -129,7 +129,7 @@
               <h6 class="m-0 fw-bold text-primary">ประวัติการเพิ่มล่าสุด</h6>
             </div>
             <ul class="list-group list-group-flush" id="historyList">
-              <li class="list-group-item text-center py-3">Loading...</li>
+              <li class="list-group-item text-center py-3"><div class="spinner"></div></li>
             </ul>
           </div>
         </div>
@@ -226,8 +226,13 @@
   <script>
     // ✅ Admin Settings Logic
     document.addEventListener('DOMContentLoaded', async () => {
-      let role = localStorage.getItem('role');
       const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      let role = localStorage.getItem('role');
 
       // 🛡️ ดึงข้อมูล User ล่าสุดเสมอ เพื่อความชัวร์เรื่อง Role (แก้ปัญหา Role ค้างจาก User เก่า)
       if (token) {

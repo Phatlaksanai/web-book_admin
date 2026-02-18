@@ -37,7 +37,10 @@
 
       <!-- Book Grid -->
       <div id="book-list" class="row g-4">
-        <div class="col-12 text-center py-5 text-muted">Loading...</div>
+        <div class="col-12 text-center py-5">
+          <div class="spinner"></div>
+          <p class="text-muted mt-2">กำลังโหลดหนังสือ...</p>
+        </div>
       </div>
 
     </div>
@@ -50,6 +53,11 @@
   <script src="js/settings.js"></script>
   <script src="js/library.js"></script>
   <script src="js/layout.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = '/login.html';
+    }
+  </script>
 
 </body>
 </html>

@@ -10,6 +10,12 @@
 <!-- Vanta Background -->
 <div id="vanta-bg"></div>
 
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="hidden">
+  <div class="spinner"></div>
+  <p class="mt-3 fw-bold text-dark">กำลังเข้าสู่ระบบ...</p>
+</div>
+
 <div class="auth-container">
   <div class="auth-header">
     <h1>Librarian Login</h1>
@@ -87,6 +93,7 @@ function handleEnter(event) {
 }
 
 async function login() {
+  document.getElementById('loading-overlay').classList.remove('hidden');
   const emailInput = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
@@ -94,24 +101,29 @@ async function login() {
     ? emailInput
     : emailInput + '@gmail.com';
 
-  const res = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: emailToSend,
-      password
-    })
-  });
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: emailToSend,
+        password
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (res.ok) {
-    localStorage.setItem('token', data.token); // ✅ สำคัญ
-    if (data.role) localStorage.setItem('role', data.role); // ✅ บันทึก Role
-    window.location.href = 'dashboard.html';   // ✅ ไป dashboard
-  } else {
-    document.getElementById('result').innerText =
-      data.message || 'Login failed';
+    if (res.ok) {
+      localStorage.setItem('token', data.token); // ✅ สำคัญ
+      if (data.role) localStorage.setItem('role', data.role); // ✅ บันทึก Role
+      window.location.href = 'dashboard.html';   // ✅ ไป dashboard
+    } else {
+      document.getElementById('loading-overlay').classList.add('hidden');
+      document.getElementById('result').innerText = data.message || 'Login failed';
+    }
+  } catch (err) {
+    document.getElementById('loading-overlay').classList.add('hidden');
+    console.error(err);
   }
 }
 </script>

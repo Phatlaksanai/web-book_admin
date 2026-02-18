@@ -11,6 +11,12 @@
 </head>
 <body class="bg-light">
 
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="d-none">
+    <div class="spinner"></div>
+    <p id="loading-text" class="mt-3 fw-bold text-dark">กำลังทำงาน...</p>
+  </div>
+
   <!-- Navbar -->
   <div id="navbar"></div>
 
@@ -87,6 +93,10 @@
   <script src="js/layout.js"></script>
   <script>
     const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login.html';
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const bookId = urlParams.get('id');
 
@@ -114,6 +124,8 @@
     });
 
     async function loadBookData(id) {
+      document.getElementById('loading-text').innerText = 'กำลังโหลดข้อมูล...';
+      document.getElementById('loading-overlay').classList.remove('d-none');
       try {
         const res = await fetch(`/api/books/${id}`, { headers: { 'x-auth-token': token } });
         if (!res.ok) throw new Error('Failed to fetch book');
@@ -135,9 +147,14 @@
           document.getElementById('pdfFileName').innerText = `📄 ไฟล์ปัจจุบัน: ${pdfData.fileName || (pdfData.url ? pdfData.url.split('/').pop() : 'Existing PDF')}`;
         }
       } catch (err) { console.error(err); }
+      finally {
+        document.getElementById('loading-overlay').classList.add('d-none');
+      }
     }
 
     async function submitBook() {
+      document.getElementById('loading-text').innerText = 'กำลังบันทึกข้อมูล...';
+      document.getElementById('loading-overlay').classList.remove('d-none');
       const formData = new FormData();
       formData.append('title', document.getElementById('title').value);
       formData.append('detail', document.getElementById('detail').value);
@@ -152,9 +169,15 @@
       const url = bookId ? `/api/books/${bookId}` : '/api/books';
       const method = bookId ? 'PUT' : 'POST';
 
-      const res = await fetch(url, { method, headers: { 'x-auth-token': token }, body: formData });
-      if (res.ok) { alert('บันทึกสำเร็จ'); window.location.href = '/library.html'; }
-      else { alert('เกิดข้อผิดพลาด'); }
+      try {
+        const res = await fetch(url, { method, headers: { 'x-auth-token': token }, body: formData });
+        document.getElementById('loading-overlay').classList.add('d-none');
+        if (res.ok) { alert('บันทึกสำเร็จ'); window.location.href = '/library.html'; }
+        else { alert('เกิดข้อผิดพลาด'); }
+      } catch (err) {
+        document.getElementById('loading-overlay').classList.add('d-none');
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      }
     }
   </script>
 </body>
