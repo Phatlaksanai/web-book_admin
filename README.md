@@ -1,83 +1,75 @@
-npm install express mongoose dotenv cors multer cloudinary multer-storage-cloudinary
-npm install nodemon --save-dev
-npm install bcryptjs
-npm install express-session
-npm install connect-mongo@4
-npm install nodemailer otp-generator dotenv
+# E-Book Admin Panel
 
+## About
 
-npm install qrcode
-npm install bwip-js
-npm i jsbarcode canvas
+ระบบ **Admin Panel** สำหรับจัดการข้อมูลภายในแอปพลิเคชัน E-Book โดยผู้ดูแลระบบสามารถจัดการหนังสือและผู้ใช้งาน รวมถึงเพิ่ม แก้ไข และลบข้อมูลหนังสือภายในระบบ
 
-npm install chart.js
+## My Responsibilities
 
-npm install winston winston-mongodb
+### Frontend Development
 
-npm install crypto
+* พัฒนา Admin Panel ด้วย **HTML, CSS และ JavaScript**
+* ออกแบบและพัฒนาหน้าจอสำหรับผู้ดูแลระบบ
+* พัฒนาหน้าจอจัดการข้อมูลหนังสือ
+* พัฒนาหน้าจอจัดการข้อมูลผู้ใช้งาน
+* เชื่อมต่อ Frontend กับ Backend ผ่าน **REST API**
+* แสดงข้อมูลหนังสือและผู้ใช้งานจาก Backend
 
-have 5 id all pss:1234
-test0@gmail.com
-test1@gmail.com
-test2@gmail.com
-test3@gmail.com
-test4@gmail.com
-test5@gmail.com
+### Backend Development
 
-Register index 146
+* พัฒนา Backend ด้วย **Node.js และ Express.js**
+* พัฒนา REST API สำหรับจัดการข้อมูลหนังสือ
+* พัฒนาฟังก์ชัน **เพิ่ม แก้ไข และลบหนังสือ (CRUD)**
+* พัฒนา API สำหรับจัดการข้อมูลผู้ใช้งาน
+* เชื่อมต่อ Backend กับ Database
 
-```
-star-up
-├─ README.md
-├─ components
-│  ├─ footer.html
-│  └─ navbar.html
-├─ config
-│  ├─ cloudinary.js
-│  └─ db.js
-├─ controllers
-│  ├─ adminController.js
-│  ├─ authController.js
-│  └─ bookController.js
-├─ middleware
-│  ├─ auth.js
-│  └─ upload.js
-├─ models
-│  ├─ Book.js
-│  ├─ BookCode.js
-│  ├─ OTP.js
-│  └─ User.js
-├─ package-lock.json
-├─ package.json
-├─ public
-│  ├─ addAdmin.html
-│  ├─ addbook.html
-│  ├─ createCode.html
-│  ├─ css
-│  │  ├─ retro.css
-│  │  ├─ style.css
-│  │  ├─ swiss.css
-│  │  └─ y2k.css
-│  ├─ images
-│  │  └─ default-cover.png
-│  ├─ index.html
-│  ├─ js
-│  │  ├─ createCode.js
-│  │  ├─ dashboard.js
-│  │  ├─ index.js
-│  │  ├─ layout.js
-│  │  ├─ library.js
-│  │  ├─ main.js
-│  │  └─ settings.js
-│  ├─ library.html
-│  ├─ login.html
-│  └─ register.html
-├─ routes
-│  ├─ adminRoutes.js
-│  ├─ authRoutes.js
-│  └─ bookRoutes.js
-├─ server.js
-└─ utils
-   └─ sendEmail.js
+### File Management
 
+* เชื่อมต่อ **Cloudinary** สำหรับจัดเก็บไฟล์รูปภาพ
+* จัดเก็บไฟล์ PDF ของหนังสือผ่าน Cloudinary
+* จัดการ URL สำหรับเข้าถึงรูปภาพและไฟล์หนังสือ
+
+## Technologies
+
+### Frontend
+
+* HTML
+* CSS
+* JavaScript
+
+### Backend
+
+* Node.js
+* Express.js
+* REST API
+
+### Storage
+
+* Cloudinary
+
+## Main Features
+
+* 📚 เพิ่มหนังสือ
+* ✏️ แก้ไขข้อมูลหนังสือ
+* 🗑️ ลบหนังสือ
+* 📖 จัดการไฟล์ PDF หนังสือ
+* 🖼️ จัดการรูปภาพหนังสือ
+* 👤 จัดการข้อมูลผู้ใช้งาน
+* 🔄 เชื่อมต่อข้อมูลระหว่าง Admin Panel และ Backend
+
+## System Architecture
+
+```text
+Admin Panel
+HTML + CSS + JavaScript
+          │
+          │ REST API
+          ↓
+   Node.js + Express
+          │
+          ├──────────→ Database
+          │
+          └──────────→ Cloudinary
+                       ├── Book Cover Images
+                       └── Book PDF Files
 ```
